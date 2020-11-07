@@ -1,6 +1,0 @@
-2020-09-19 17:42:46.363 TRACE 19944 --- [Thread-12] W.M.T.ReplayDatasetSensorPrototypeThread : Sending for sensorId {2}
-2020-09-19 17:42:48.372 TRACE 19944 --- [Thread-12] W.M.T.ReplayDatasetSensorPrototypeThread : Sending for sensorId {2}
-2020-09-19 17:42:51.379 TRACE 19944 --- [Thread-12] W.M.T.ReplayDatasetSensorPrototypeThread : Sending for sensorId {2}
-2020-09-19 17:42:52.385 TRACE 19944 --- [Thread-12] W.M.T.ReplayDatasetSensorPrototypeThread : Sending for sensorId {1}
-2020-09-19 17:42:53.391 TRACE 19944 --- [Thread-12] W.M.T.ReplayDatasetSensorPrototypeThread : Sending for sensorId {2}
-2020-09-19 17:42:54.399 TRACE 19944 --- [Thread-12] W.M.T.ReplayDatasetSensorPrototypeThread : Sending for sensorId {1}
