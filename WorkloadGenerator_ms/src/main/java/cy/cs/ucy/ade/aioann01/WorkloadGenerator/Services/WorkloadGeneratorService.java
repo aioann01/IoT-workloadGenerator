@@ -87,12 +87,8 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
         log.debug("Entered readConfigs");
         String errorMessage;
         try {
-            // InputStream is = this.getClass().getClassLoader().getResourceAsStream(CONFIG_FILE);
             String configsDirectory = ApplicationPropertiesUtil.getConfigsDirectory();
              String json = IOUtils.toString(new FileInputStream(configsDirectory + CONFIG_FILE), StandardCharsets.UTF_8);
-
-            // is.close();
-           // String json = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(CONFIG_FILE).toURI())));
             if(json.startsWith(UTF8_BOM))
                 json = json.substring(1);
             JSONObject fileToJson = new JSONObject(json);

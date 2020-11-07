@@ -15,7 +15,6 @@ import java.util.Properties;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.EXCEPTION_CAUGHT;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.WORKLOAD_GENERATOR_PROPERTIES_WINDOWS;
 @Configuration
-//@PropertySource("classpath:application.properties")
 @Service
 public class ApplicationPropertiesUtil{
 
@@ -34,13 +33,14 @@ public class ApplicationPropertiesUtil{
     private static Boolean enabledAuthorization;
 
 
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
-        return new PropertySourcesPlaceholderConfigurer();
-    }
+//    @Bean
+//    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+//        return new PropertySourcesPlaceholderConfigurer();
+//    }
 
     public static void setWorkloadGeneratorProperties() {
         try {
+            log.info("Loading workloadGenerator properties from config directory {"+configsDirectory+"}");
             workloadGeneratorProperties = new Properties();
             workloadGeneratorProperties.load(new FileInputStream(configsDirectory + WORKLOAD_GENERATOR_PROPERTIES_WINDOWS));
 
@@ -52,15 +52,15 @@ public class ApplicationPropertiesUtil{
     @Value("${configs.directory}")
     public void setConfigsDirectory(String configsDirectory) {
         ApplicationPropertiesUtil.configsDirectory = configsDirectory;
+        log.debug("Config directory property initialized succesfully: {"+configsDirectory+"}");
+
     }
 
     @Value("${resources.directory}")
     public void setResourcesDirectory(String resourcesDirectory) {
         ApplicationPropertiesUtil.resourcesDirectory = resourcesDirectory;
-    }
+        log.debug("Resources directory property initialized succesfully: {"+resourcesDirectory+"}");
 
-    public static String getSsoServicePort() {
-        return ssoServicePort;
     }
 
     @Value("${sso.service.port}")
@@ -68,22 +68,31 @@ public class ApplicationPropertiesUtil{
         ApplicationPropertiesUtil.ssoServicePort = ssoServicePort;
     }
 
-    public static String getSsoServiceIp() {
-        return ssoServiceIp;
-    }
-
     @Value("${sso.service.ip}")
     public  void setSsoServiceIp(String ssoServiceIp) {
         ApplicationPropertiesUtil.ssoServiceIp = ssoServiceIp;
     }
 
-    public static Boolean getEnabledAuthorization() {
-        return enabledAuthorization;
-    }
     @Value("${Authorization.enabled}")
     public  void setEnabledAuthorization(Boolean enabledAuthorization) {
         ApplicationPropertiesUtil.enabledAuthorization = enabledAuthorization;
+        log.debug("Enabled Authorization:"+enabledAuthorization);
+
     }
+
+
+    public static String getSsoServicePort() {
+        return ssoServicePort;
+    }
+
+    public static String getSsoServiceIp() {
+        return ssoServiceIp;
+    }
+
+    public static Boolean getEnabledAuthorization() {
+        return enabledAuthorization;
+    }
+
 
     public static String getConfigsDirectory() {
         return configsDirectory;
@@ -97,16 +106,11 @@ public class ApplicationPropertiesUtil{
     //WorkloadGenerator.properties
     public static String readPropertyFromConfigs(String propertyName) throws Exception {
         String errorMessage = null;
-//        if (configsDirectory == null)
-//            configsDirectory = readApplicationProperty(CONFIGS_DIRECTORY_PROPERTY);
+
         if (workloadGeneratorProperties == null) {
             try {
                 workloadGeneratorProperties = new Properties();
-                //Container
                 workloadGeneratorProperties.load(new FileInputStream(configsDirectory + WORKLOAD_GENERATOR_PROPERTIES_WINDOWS));
-
-                //local
-                // properties.load(new FileInputStream("/home/configs/"+WORKLOAD_GENERATOR_PROPERTIES_WINDOWS));
 
             } catch (Exception e) {
                 errorMessage = WORKLOAD_GENERATOR_PROPERTIES_WINDOWS + "file does not exist in " + configsDirectory;

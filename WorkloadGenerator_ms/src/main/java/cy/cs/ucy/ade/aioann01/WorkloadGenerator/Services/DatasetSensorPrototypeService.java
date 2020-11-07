@@ -150,20 +150,6 @@ public class DatasetSensorPrototypeService {
         }
         try {
             String resourcesDirectory = ApplicationPropertiesUtil.getResourcesDirectory();
-            //Local
-            //  localPath = "C:\\Users\\andre\\Dev\\WorkloadGenerator\\WorkloadGenerator_ms\\resources\\";
-
-            //Container
-            //localPath = RESOURCES_DIRECTORY;
-
-            // InputStream is = this.getClass().getClassLoader().getResourceAsStream(localPath + csvFileName);
-            //String json = IOUtils.toString(new FileInputStream("/home/configs/"+CONFIG_FILE), StandardCharsets.UTF_8);
-            //String json=IOUtils.toString(new FileInputStream("./home/configs/"+CONFIG_FILE),StandardCharsets.UTF_8)
-            // is.close();
-            //file = new File(getClass().getClassLoader().getResource(csvFileName).getFile());
-
-
-            //file = new File(this.getClass().getClassLoader().getResource(localPath + csvFileName).getFile());
             file = new File(resourcesDirectory + csvFileName);
             BufferedReader br = new BufferedReader(new FileReader(file));
             String firstLine = br.readLine();
@@ -173,7 +159,7 @@ public class DatasetSensorPrototypeService {
             boolean sensorIdColumnNameFound = false;
             boolean timestampColumnNameFound = false;
             int timestampColumnIndex = 0;
-            for(int i=0;i<columnNames.length;++i){
+            for(int i=0; i <columnNames.length; ++i){
                 if(sensorIdColumnNameFound && timestampColumnNameFound)
                     break;
                 if(columnNames[i].equals(sensorColumnIdName))
@@ -285,8 +271,6 @@ public class DatasetSensorPrototypeService {
 
     public String createDatasetSensorPrototypeMessage(Boolean exportDatasetStatistics, SensorFieldStatistics[] valuesStatistics, String datasetSensorPrototypeName, String [] fieldNames, String [] fieldValues, int sensorIdColumnIndex, int timestampColumnIndex, String sensorMessageFields, SensorMessagePrototype sensorMessagePrototype, SensorMessageEnum messageType){
         JSONObject csvRecordFieldsMessageJSONObject = new JSONObject();
-//        Random rand = new Random();
-//        Double r = rand.nextDouble();
 
         String finalMessage = null;
         try {
@@ -295,9 +279,8 @@ public class DatasetSensorPrototypeService {
                 if (/*i != sensorIdColumnIndex && i != timestampColumnIndex && */isFieldToBeSend(sensorMessageFields, fieldNames[i]) &&   i < fieldValues.length) {
                     csvRecordFieldsMessageJSONObject.put(fieldNames[i], fieldValues[i]);
                     if(exportDatasetStatistics && valuesStatistics[i] != null){
-                        // if(r > 0.5) {
                         SensorUtils.saveFieldStatistics(valuesStatistics[i], fieldValues[i]);
-                        //}
+
                     }
                 }
             }

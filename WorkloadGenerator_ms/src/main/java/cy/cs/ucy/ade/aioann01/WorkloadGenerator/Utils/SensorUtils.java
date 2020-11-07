@@ -304,7 +304,6 @@ public class SensorUtils<T> {
             //  try {
             String fieldValue = createFieldValue(fieldPrototype).toString();
             if(evaluateFieldValue){
-                // if(random > 0.5) {
                 SensorUtils.saveFieldStatistics(sensorFieldStatistics, fieldValue);
                 //}
             }
