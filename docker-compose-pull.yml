@@ -1,0 +1,95 @@
+version: '3.7'
+
+services:
+
+  workload-generator-ms:
+    image:aioann01/workload_generator:latest
+    volumes:
+      - /export/home/run-workloadGenerator/configs/configs_file.json:/home/configs/configs_file.json
+      - /export/home/run-workloadGenerator/configs/configs_file_ALL.json:/home/configs/configs_file_ALL.json
+      - /export/home/run-workloadGenerator/configs/workloadGenerator.properties:/home/configs/workloadGenerator.properties
+      - /export/home/run-workloadGenerator/resources/taxi.csv:/home/resources/taxi.csv
+    environment:
+      JAVA_OPTS="-Xmx1G -Xms1G"
+      sso.service.port=8090
+      server.port=8091
+      sso.service.host=sso-ms
+      Authorization.enabled=false
+      logging.level.*=INFO
+      logging.file=logs/server.log
+      logging.level.cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.*=TRACE
+      logging.level.cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.*=TRACE
+    ports:
+      - "8091:8091"
+      - "8001:8001"
+    container_name: workloadGenerator_ms
+    networks:
+      - workloadGenerator-network  
+
+
+  #sensors-ms:
+   # build:
+    #  context: .
+     # dockerfile: Sensors_ms/Dockerfile
+    #ports:
+    #  - "8092:8092"
+    #  - "8002:8002"
+   # networks:
+   #   - workloadGenerator-network    
+   # container_name: sensors_ms
+  
+  
+  http-server:
+    image:aioann01/http_server:latest
+    environment:
+      server.port=8095
+      logging.level=INFO,DEBUG,ERROR
+      logging.file=/home/logs/server.log
+      logging.level.web=DEBUG
+    ports:
+      - "8095:8095"
+      - "8005:8005"
+    networks:
+      - workloadGenerator-network  
+    container_name: httpServer
+
+
+  #mqtt-subscriber-client-ms:
+   # build:
+    #  context: .
+     # dockerfile: MqttSubscriberClient/Dockerfile
+    #ports:
+    #  - "8094:8094"
+    #  - "8004:8004"
+    #container_name: mqttSubscriberClient_ms
+    #networks:
+    #  - workloadGenerator-network  
+  
+    
+    
+  #mqtt-broker:
+  #  image: eclipse-mosquitto
+  #  ports:
+  #    - "1883:1883"
+  #    - "9001:9001"
+  #  container_name: mqttBroker
+  #  networks:
+  #    - workloadGenerator-network  
+  
+  
+  #sso-ms:
+  #  build:
+  #    context: .
+  #    dockerfile: SSO_ms/Dockerfile
+  #  ports:
+  #    - "8090:8090"
+  #    - "8000:8000"
+  #  networks:
+  #    - workloadGenerator-network    
+  #  container_name: sso_ms
+      
+networks:
+   workloadGenerator-network:
+     driver: bridge       
+    
+   

@@ -1,0 +1,9 @@
+/externalsortinginjava-master
+*.zip
+/Sensors_ms
+/HttpServer
+/KafkaConsumerClient
+/SSO_ms
+/WorkloadGenerator_ms
+/.git
+=.zo[

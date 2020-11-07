@@ -1,0 +1,84 @@
+version: '3.7'
+
+services:
+
+  workload-generator-ms:
+    build:
+      context: .
+      dockerfile: WorkloadGenerator_ms/Dockerfile
+    ports:
+      - "8091:8091"
+      - "8001:8001"
+    command: java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8001 home/WorkloadGenerator-1.0.0-SNAPSHOT.jar
+    container_name: workloadGenerator_ms
+    networks:
+      - workloadGenerator-network  
+
+
+  sensors-ms:
+    build:
+      context: .
+      dockerfile: Sensors_ms/Dockerfile
+    ports:
+      - "8092:8092"
+      - "8002:8002"
+    command: java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8002 home/Sensors-1.0.0-SNAPSHOT.jar
+    networks:
+      - workloadGenerator-network    
+    container_name: sensors_ms
+  
+  
+  http-server:
+    build:
+      context: .
+      dockerfile: HttpServer/Dockerfile
+    ports:
+      - "8095:8095"
+      - "8005:8005"
+    command: java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8005 home/HttpServer-1.0.0-SNAPSHOT.jar
+    networks:
+      - workloadGenerator-network  
+    container_name: httpServer
+
+
+  mqtt-subscriber-client-ms:
+    build:
+      context: .
+      dockerfile: MqttSubscriberClient/Dockerfile
+    ports:
+      - "8094:8094"
+      - "8004:8004"
+    command: java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8004 home/MqttSubscriberClient-1.0.0-SNAPSHOT.jar
+    container_name: mqttSubscriberClient_ms
+    networks:
+      - workloadGenerator-network  
+
+    
+    
+  mqtt-broker:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    container_name: mqttBroker
+    networks:
+      - workloadGenerator-network  
+  
+  
+  sso-ms:
+    build:
+      context: .
+      dockerfile: SSO_ms/Dockerfile
+    ports:
+      - "8090:8090"
+      - "8000:8000"
+    command: java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 home/SSO-1.0.0-SNAPSHOT.jar
+    networks:
+      - workloadGenerator-network    
+    container_name: sso_ms
+      
+networks:
+   workloadGenerator-network:
+     driver: bridge       
+    
+   
