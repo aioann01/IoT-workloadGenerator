@@ -1,0 +1,77 @@
+{
+	"configs": {
+		"protocol": "string-{HTTP/MQTT...}",
+		"dataset": "file_name",
+		"dataset_file": "",
+		"data_format_configs": {
+			"devices": [
+				{
+					"name": "string",
+					"quantity": "number",
+					"sensorPrototypes": [
+						{
+							"description": "string",
+							"name": "string",
+							"quantity": "number",
+							"generation_rate": {
+								"constant": "number",
+								"random": {
+									"minValue": "number",
+									"maxValue": "number"
+								},
+								"distribution": [
+									{
+										"minValue": "number",
+										"maxValue": "number",
+										"propability": "number"
+									}
+								]
+							},
+							"messagePrototype": {
+								"type": "string-{json/xml/txt}",
+								"filedsPrototypes": [
+									{
+										"name": "string",
+										"type": "string",
+										"value": {
+											"random": {
+												"minValue": "number",
+												"maxValue": "number"
+											},
+											"distribution": [
+												{
+													"minValue": "number",
+													"maxValue": "number",
+													"propability": "number"
+												}
+											],
+											"constant": "value"
+										},
+										"unit": "string"
+									}
+								]
+							}
+						}
+					],
+					"location": {
+						"latitude": "double",
+						"longitude": "double",
+						"height": "double"
+					}
+				}
+			]
+		},
+		"http_servers": [
+			{
+				"serverIp": "string",
+				"serverPort": "number"
+			}
+		],
+		"broker_clusters": [
+			{
+				"serverIp": "string",
+				"serverPort": "number"
+			}
+		]
+	}
+}

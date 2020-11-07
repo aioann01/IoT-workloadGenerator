@@ -1,0 +1,58 @@
+{
+	"devices": [
+		{
+			"name": "string",
+			"quantity": "number",
+			"sensors": [
+				{
+					"description": "string",
+					"name": "string",
+					"quantity": "number",
+					"generation_rate": {
+						"constant": "number",
+						"random": {
+							"min_value": "number",
+							"max_value": "number"
+						},
+						"distribution": [
+							{
+								"min_value": "number",
+								"max_value": "number",
+								"propability": "number"
+							}
+						]
+					},
+					"message": {
+						"type": "string-{json/xml/txt}",
+						"fields": [
+							{
+								"name": "string",
+								"value": {
+									"type": "string",
+									"random": {
+										"min_value": "number",
+										"max_value": "number"
+									},
+									"distribution": [
+										{
+											"min_value": "number",
+											"max_value": "number",
+											"propability": "number"
+										}
+									],
+									"constant": "value",
+									"unit": "string"
+								}
+							}
+						]
+					}
+				}
+			],
+			"location": {
+				"latitude": "double",
+				"longitude": "double",
+				"height": "double"
+			}
+		}
+	]
+}

@@ -1,0 +1,1 @@
+awk '/TRACE/' server.log | sed  "s/message: {.*} /LEL/g" > tmp.text

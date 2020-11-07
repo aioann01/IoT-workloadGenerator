@@ -1,0 +1,45 @@
+{
+	"configs": {
+		"protocol": "HTTP",
+
+		"httpConfigs": {
+			"requestURI": "testing",
+			"httpServers": [{
+				"serverIp": "http-server",
+				"serverPort": "8095"
+			}]
+		},
+
+		"sensorDataConfigs": {
+			"outputFileFoMockSensorData": "output.csv",
+			"sensorPrototypes": [
+
+
+			
+				{
+					"datasetSensorPrototype": {
+						"exportGenerationRate": "true",
+
+						"sensorPrototypeName": "panel",
+						"messageExportType": "json",
+						"timestampFormat": "yyyy-MM-dd HH:mm:ss",
+						"timestampedDataset": "false",
+						"sortedDataset": "true",
+						"datasetFile": "pvwatts_hourly_cy.csv",
+						"generationRate": {
+							"constant": {
+								"value": 2
+							}
+						},
+						"messagePrototype": {
+							"type": "json"
+
+						}
+					}
+				}
+			]
+		}
+
+
+	}
+}

@@ -1,0 +1,114 @@
+{
+	"configs": {
+		"protocol": "string-{HTTP/MQTT...}",
+		"http_servers": [{
+			"serverIp": "string",
+			"serverPort": "string"
+		}],
+		"mqtt_configs": {
+			"topic": "string",
+			"broker_clusters": [{
+				"serverIp": "string",
+				"serverPort": "string"
+			}]
+		},
+			"kafka_configs":{
+			"topic":"string",
+			"kafka_broker_clusters":[{
+				"serverIp": "string",
+				"serverPort": "string"
+			}]
+		},
+		"sensorDataConfigs": {
+
+			"replaySensorCSVDataSet": {
+				"isDataSetTimestamped": "boolean",
+				"sensorPrototypes": [{
+					"dataSetFile": "dataset.csv",
+					"messageIndex":"integer",
+					"sensorIdIndex":"integer"
+				}]
+			},
+
+			"createSensorData": {
+
+		"output_file": "string",
+				"sensorPrototypes": [{
+					"description": "string",
+					"name": "string",
+					"quantity": "number",
+					"generation_rate": {
+						"constant": "number",
+						"random": {
+							"minValue": "number",
+							"maxValue": "number"
+						},
+						"distributions": [{
+							"minValue": "number",
+							"maxValue": "number",
+							"probability": "number"
+						}],
+
+						"normalDistribution": {
+							"mean": "double",
+							"deviation": "double"
+						}
+					},
+					"messagePrototype": {
+						"type": "string-{json/xml/txt}",
+						"fieldsPrototypes": [{
+							"name": "string",
+							"type": "string",
+							"value": {
+								"random": {
+									"minValue": "number",
+									"maxValue": "number"
+								},
+								"distributions": [{
+									"value": "boolean",
+									"minValue": "number",
+									"maxValue": "number",
+									"probability": "number"
+								}],
+								"normalDistribution": {
+									"mean": "number",
+									"deviation": "number"
+								},
+								"constant": "value"
+							},
+							"unit": "string"
+						}, {
+							"name": "string",
+							"type": "object",
+							"value": [{
+									"name": "string",
+									"type": "string",
+									"value": {
+										"random": {
+											"minValue": "number",
+											"maxValue": "number"
+										},
+										"distributions": [{
+											"value": "boolean",
+											"minValue": "number",
+											"maxValue": "number",
+											"probability": "number"
+										}],
+										"normalDistribution": {
+											"mean": "number",
+											"deviation": "number"
+										},
+										"constant": "value"
+									},
+									"unit": "string"
+								}
+
+							]
+						}]
+					}
+				}]
+			}
+		}
+
+	}
+}
