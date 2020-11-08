@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorCo
 public class MqttSensorMessageSendService implements ISensorMessageSendService {
 
 
-    List<IMqttClient> mqttClients;
+    List<IMqttClient> mqttClients = new ArrayList<>();
 
     private List<Server> mqttBrokers;
 

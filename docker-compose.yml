@@ -5,12 +5,14 @@ services:
   workload-generator-ms:
     build:
       context: .
-      dockerfile: WorkloadGenerator_ms/Dockerfile
+      dockerfile: ../WorkloadGenerator_ms/Dockerfile
     volumes:
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/configs_file_ALL.json:/home/configs/configs_file.json
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/configs_file_ALL.json:/home/configs/configs_file_ALL.json
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/workloadGenerator.properties:/home/configs/workloadGenerator.properties
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/taxi.csv:/home/resources/taxi.csv
+      - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/beach-water-quality-automated-sensors-1.csv:/home/resources/beach-water-quality-automated-sensors-1.csv
+      - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/trafficData158324.csv:/home/resources/trafficData158324.csv
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/pvwatts_hourly_cy.csv:/home/resources/pvwatts_hourly_cy.csv
     environment:
       - JAVA_OPTS="-Xmx3G -Xms3G"
@@ -47,11 +49,11 @@ services:
   http-server:
     build:
       context: .
-      dockerfile: HttpServer/Dockerfile
+      dockerfile: ../HttpServer/Dockerfile
     environment:
       - server.port=8095
       - logging.level=INFO,DEBUG,ERROR
-      - logging.file=/home/logs/server.log
+      - LOGGING_FILE=/home/logs/server.log
       - logging.level.web=DEBUG
     ports:
       - "8095:8095"

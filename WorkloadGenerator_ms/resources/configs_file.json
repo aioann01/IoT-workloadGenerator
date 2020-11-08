@@ -1,43 +1,35 @@
 {
 	"configs": {
-		"protocol": "HTTP",
+		"protocol": "MQTT",
 
-		"httpConfigs": {
-			"requestURI": "testing",
-			"httpServers": [{
-				"serverIp": "http-server",
-				"serverPort": "8095"
+		"mqttConfigs": {
+			"topic": "home",
+			"brokerClusters": [{
+				"serverIp": "localhost",
+				"serverPort": "1883"
 			}]
-		},
+},
 
 		"sensorDataConfigs": {
-			"outputFileFoMockSensorData": "output.csv",
 			"sensorPrototypes": [
-
-
 			
-				{
-					"datasetSensorPrototype": {
-						"exportGenerationRate": "true",
+		
+			{
+				"datasetSensorPrototype": {
+					"exportGenerationRate":"true",
 
-						"sensorPrototypeName": "panel",
-						"messageExportType": "json",
-						"timestampFormat": "yyyy-MM-dd HH:mm:ss",
-						"timestampedDataset": "false",
-						"sortedDataset": "true",
-						"datasetFile": "pvwatts_hourly_cy.csv",
-						"generationRate": {
-							"constant": {
-								"value": 2
-							}
-						},
-						"messagePrototype": {
-							"type": "json"
-
-						}
-					}
+					"sensorPrototypeName": "beachWateQuality",
+					"messageExportType": "json",
+					"timestampFormat": "MM/dd/yyyy HH:mm:ss aa",
+					"timestampedDataset": "true",
+					"sortedDataset": "false",
+					"datasetFile": "beach-water-quality-automated-sensors-1.csv",
+					"timestampColumnName": "Measurement Timestamp",
+					"sensorIdColumnName": "Beach Name"
 				}
-			]
+						
+			}
+								]
 		}
 
 

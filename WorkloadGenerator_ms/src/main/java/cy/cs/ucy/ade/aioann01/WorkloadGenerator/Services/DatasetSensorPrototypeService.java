@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.google.code.externalsorting.csv.CsvExternalSort.DEFAULTMAXTEMPFILES;
@@ -121,8 +123,8 @@ public class DatasetSensorPrototypeService {
         }
         if(datasetSensorPrototype.getMessagePrototype() == null)
             log.warn("messagePrototype of {" + datasetSensorPrototypeName + "} datasetSensorPrototype has not been provided or is null. No mock extra fields will be created.");
-        else
-            log.warn("generationRate of {" + datasetSensorPrototypeName + "} datasetSensorPrototype has not been provided or is null. Timestamp will be used.");
+//        else
+//            log.warn("generationRate of {" + datasetSensorPrototypeName + "} datasetSensorPrototype has not been provided or is null. Timestamp will be used.");
         if (datasetSensorPrototype.getSensorIdColumnName() == null) {
             errorMessage = "sensorIdColumnName of {" + datasetSensorPrototypeName + "} datasetSensorPrototype is not provided. SensorPrototype  name will be used";
             log.warn(errorMessage);
@@ -132,7 +134,7 @@ public class DatasetSensorPrototypeService {
     }
 
 
-    public File validateFile(boolean isSorted, String csvFileName, String sensorColumnIdName, boolean isTimestamped, String timestampColumnName, String datasetSensorPrototypeName){
+    public File validateFile(Boolean isSorted, String csvFileName, String sensorColumnIdName, Boolean isTimestamped, String timestampColumnName, String datasetSensorPrototypeName, String timestampFormat){
         log.debug("Validating csv file for {"+ datasetSensorPrototypeName +"} datasetSensorPrototype");
         File file;
         if(csvFileName == null){
@@ -178,7 +180,7 @@ public class DatasetSensorPrototypeService {
                     File sortedFile = null;
                     try {
                         String trimmedDatasetName = file.getName().replace(".csv","");
-                        sortedFile = sortCSVDataset(file, trimmedDatasetName + "_sorted.csv", timestampColumnIndex);
+                        sortedFile = sortCSVDataset(file, trimmedDatasetName + "_sorted.csv", timestampColumnIndex, timestampFormat);
                         if(sortedFile == null){
                             log.error("DatasetSensorPrototype {"+datasetSensorPrototypeName+"} is timestamped but could not be sorted.");
                             return null;
@@ -205,9 +207,19 @@ public class DatasetSensorPrototypeService {
         }
     }
 
+    private Comparator<CSVRecord> createCSVRecordTimestampComparator(String timestampFormat, Integer timestampColumnIndex){
+        SimpleDateFormat formatter = new SimpleDateFormat(timestampFormat);
+        return (op1, op2) -> {
+            try {
+                return formatter.parse(op1.get(timestampColumnIndex)).compareTo(formatter.parse(op2.get(timestampColumnIndex)));
+            } catch (ParseException e){
+                return op1.get(timestampColumnIndex).compareTo(op2.get(timestampColumnIndex));
+            }
+        };
+    }
 
-    public File sortCSVDataset(File file, String outputName, int timestampColumnIndex){
-        Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(timestampColumnIndex).compareTo(op2.get(timestampColumnIndex));
+    public File sortCSVDataset(File file, String outputName, int timestampColumnIndex, String timestampFormat){
+        Comparator<CSVRecord> comparator = createCSVRecordTimestampComparator(timestampFormat, timestampColumnIndex);
         CsvSortOptions sortOptions = new CsvSortOptions
                 .Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
                 .charset(Charset.defaultCharset())
@@ -300,13 +312,7 @@ public class DatasetSensorPrototypeService {
 
     public void sendMessage(String sensorId, String message, SensorMessageEnum contentType) throws RuntimeException{
         try {
-            if(sensorMessageSendService instanceof MqttSensorMessageSendService)
-                sensorMessageSendService.sendMessage(sensorId, message, contentType);
-            else if(sensorMessageSendService instanceof KafkaSensorMessageSendService){
-                sensorMessageSendService.sendMessage(sensorId, message,contentType);
-            }
-            else
-                sensorMessageSendService.sendMessage(sensorId, message, contentType);
+            sensorMessageSendService.sendMessage(sensorId, message, contentType);
         }catch (Exception exception){
             log.error("Error while sending sensor message: "+exception.getMessage(),exception);
         }

@@ -184,7 +184,7 @@ public class SensorUtils<T> {
                 SensorUtils.setSensorMessagePrototypeType(sensorPrototype);
             if(sensorMessagePrototype !=null) {
                 List<FieldPrototype> fieldPrototypes = sensorMessagePrototype.getFieldsPrototypes();
-                if (fieldPrototypes!=null && !fieldPrototypes.isEmpty()) {
+                if (fieldPrototypes != null && !fieldPrototypes.isEmpty()) {
                     for (FieldPrototype fieldPrototype : fieldPrototypes) {
                         setFieldTypeEnum(fieldPrototype);
                         if (fieldPrototype.getTypeEnum() == null)

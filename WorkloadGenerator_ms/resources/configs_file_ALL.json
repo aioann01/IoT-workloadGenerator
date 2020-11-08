@@ -10,7 +10,8 @@
 		}]},
 
 		"sensorDataConfigs": {
-			"sensorPrototypes": [{
+			"sensorPrototypes": [
+			{
 				"datasetSensorPrototype": {
 					"exportGenerationRate":"true",
 
@@ -42,9 +43,47 @@
 							}]
 
 						}
-				}},
+				}
+				},
+				
+					{
+				"datasetSensorPrototype": {
+					"exportGenerationRate":"true",
+
+					"sensorPrototypeName": "dataTraffic",
+					"messageExportType": "xml",
+					"timestampFormat": "yyyy-MM-dd'T'HH:mm:ss",
+					"timestampedDataset": "true",
+					"sortedDataset": "true",
+					"datasetFile": "trafficData158324.csv",
+					"timestampColumnName": "TIMESTAMP",
+					"sensorIdColumnName": "_id"
+				}
+						
+			},
+					{
+					"datasetSensorPrototype": {
+						"exportGenerationRate": "true",
+
+						"sensorPrototypeName": "panel",
+						"messageExportType": "json",
+						"timestampedDataset": "false",
+						"datasetFile": "pvwatts_hourly_cy.csv",
+						"generationRate": {
+							"constant": {
+								"value": 2
+							}
+						},
+						"messagePrototype": {
+							"type": "json"
+
+						}
+					}
+				},
 				{
 					"mockSensorPrototype": {
+					"outputFile":"proximity_output.csv",
+						"evaluateFieldGenerationRate":true,
 						"description": "Sensor that calculates the proximity within the target to detect if an object is in the way",
 						"sensorPrototypeName": "proximity_sensor",
 						"sensorsQuantity": 3,
@@ -163,7 +202,8 @@
 				},
 				{
 					"mockSensorPrototype": {
-
+"outputFile":"motion_detection_output.csv",
+						"evaluateFieldGenerationRate":true,
 						"sensorPrototypeName": "motion_detection_sensor",
 						"description": "Sensor that detects  movement and return true if motion or false if no motion",
 						"sensorsQuantity": 1,
@@ -194,6 +234,8 @@
 				},
 				{
 					"mockSensorPrototype": {
+					"outputFile":"humidity_output.csv",
+						"evaluateFieldGenerationRate":true,
 						"name": "humidity_sensor",
 						"sensorsQuantity": 2,
 						"generationRate": {
@@ -219,6 +261,8 @@
 				},
 				{
 					"mockSensorPrototype": {
+					"outputFile":"temperature_output.csv",
+						"evaluateFieldGenerationRate":true,
 						"sensorPrototypeName": "temperature_sensor",
 						"sensorsQuantity": 1000,
 						"generationRate": {
@@ -256,6 +300,8 @@
 				},
 				{
 					"mockSensorPrototype": {
+					"outputFile":"pressure_output.csv",
+						"evaluateFieldGenerationRate":true,
 						"sensorPrototypeName": "pressure_sensor",
 						"sensorsQuantity": 1,
 						"generationRate": {

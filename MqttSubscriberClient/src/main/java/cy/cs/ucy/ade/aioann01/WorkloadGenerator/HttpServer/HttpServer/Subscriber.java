@@ -46,13 +46,14 @@ public class Subscriber implements MqttCallback {
         this.client.setCallback(this);
         this.client.connect(conOpt);
 
-        this.client.subscribe(PROXIMITY_SENSOR_TOPIC, qos);
-        this.client.subscribe(HUMIDITY_SENSOR_TOPIC, qos);
-        this.client.subscribe(TEMPERATURE_SENSOR_TOPIC, qos);
-        this.client.subscribe(TESTING_SENSOR_SENSOR_TOPIC, qos);
-        this.client.subscribe(DUMMY_SENSOR_SENSOR_TOPIC, qos);
-        this.client.subscribe(MOTION_DETECTION_SENSOR_TOPIC, qos);
-        this.client.subscribe(PRESSURE_SENSOR_TOPIC, qos);
+//        this.client.subscribe(PROXIMITY_SENSOR_TOPIC, qos);
+//        this.client.subscribe(HUMIDITY_SENSOR_TOPIC, qos);
+//        this.client.subscribe(TEMPERATURE_SENSOR_TOPIC, qos);
+//        this.client.subscribe(TESTING_SENSOR_SENSOR_TOPIC, qos);
+//        this.client.subscribe(DUMMY_SENSOR_SENSOR_TOPIC, qos);
+//        this.client.subscribe(MOTION_DETECTION_SENSOR_TOPIC, qos);
+//        this.client.subscribe(PRESSURE_SENSOR_TOPIC, qos);
+        this.client.subscribe("home/#", qos);
 
 
 

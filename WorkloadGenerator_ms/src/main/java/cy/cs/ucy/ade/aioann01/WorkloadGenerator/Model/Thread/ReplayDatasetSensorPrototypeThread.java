@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -87,8 +88,14 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
             log.error(EXCEPTION_CAUGHT +" while creating datasetSensorPrototype :" +exception.getMessage(),exception);
             return;
         }
-        File file = datasetSensorPrototypeService.validateFile(datasetSensorPrototype.isSortedDataset(),datasetSensorPrototype.getDatasetFile(),datasetSensorPrototype.getSensorIdColumnName(),
-                datasetSensorPrototype.getTimestampedDataset(),datasetSensorPrototype.getTimestampColumnName(),datasetSensorPrototype.getSensorPrototypeName());
+        File file = datasetSensorPrototypeService.validateFile(
+                datasetSensorPrototype.isSortedDataset(),
+                datasetSensorPrototype.getDatasetFile(),
+                datasetSensorPrototype.getSensorIdColumnName(),
+                datasetSensorPrototype.getTimestampedDataset(),
+                datasetSensorPrototype.getTimestampColumnName(),
+                datasetSensorPrototype.getSensorPrototypeName(),
+                datasetSensorPrototype.getTimestampFormat());
         if(file == null){
             datasetSensorPrototypeIsCorrectlySet = false;
             log.error("Dataset file {"+datasetSensorPrototype.getDatasetFile()+"} is not valid for datasetSensorPrototype {"+datasetSensorPrototype.getSensorPrototypeName()+"}.DatasetSensorPrototype will be ignored.");
@@ -138,14 +145,16 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
 
             long waitTime = 0;
             try {
-                if(datasetSensorPrototype.getTimestampedDataset()  && !datasetSensorPrototype.isSortedDataset())
-                    formatter = new SimpleDateFormat(SIMPLE_DATE_FORMAT_FOR_SORTED_CSV);
-                else
-                    formatter = new SimpleDateFormat(datasetSensorPrototype.getTimestampFormat());
+                if(datasetSensorPrototype.getTimestampedDataset()){
+                    if(!datasetSensorPrototype.isSortedDataset())
+//                        formatter = new SimpleDateFormat(SIMPLE_DATE_FORMAT_FOR_SORTED_CSV);
+//                    else
+                        formatter = new SimpleDateFormat(datasetSensorPrototype.getTimestampFormat());
 
+                }
             }catch (Exception exception){
-                log.error(EXCEPTION_CAUGHT+" while trying to parse timestamp for Dataset file {"+datasetSensorPrototype.getDatasetFile()+"}.Check that timestamp is of format : {"+datasetSensorPrototype.getTimestampFormat()+"} and that format is valid date format");
-                throw  new Exception("First timestamp is not of format : {"+datasetSensorPrototype.getTimestampFormat()+"} for Dataset file {"+datasetSensorPrototype.getDatasetFile()+"}");
+                log.error(EXCEPTION_CAUGHT+" while trying to parse timestamp format {"+datasetSensorPrototype.getTimestampFormat()+"} for Dataset file {"+datasetSensorPrototype.getDatasetFile()+"}.Check that timestamp format is valid.");
+                throw new Exception("Provided  timestamp format {"+datasetSensorPrototype.getTimestampFormat()+"} for Dataset file {"+datasetSensorPrototype.getDatasetFile()+"} is not valid");
             }
             Date previousDate = null;
             int sensorIDColumnIndex = -1;
@@ -160,8 +169,14 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
             }
             String firstRecord = bufferedReader.readLine().replaceAll("\"","");
             String [] firstColumnValues = firstRecord.split(EXCEL_COLUMN_SEPERATOR);
-            if(datasetSensorPrototype.getTimestampedDataset()){
-                previousDate = formatter.parse(firstColumnValues[timestampColumnIndex]);
+            try {
+                if (datasetSensorPrototype.getTimestampedDataset()) {
+                    previousDate = formatter.parse(firstColumnValues[timestampColumnIndex]);
+                }
+            }catch (ParseException e){
+                log.error(EXCEPTION_CAUGHT+" while trying to parse first record timestamp for Dataset file {"+datasetSensorPrototype.getDatasetFile()+"}.Check that timestamp is of format : {"+datasetSensorPrototype.getTimestampFormat()+"} and that format is valid date format",e);
+                throw new Exception("First record timestamp is not of format : {"+datasetSensorPrototype.getTimestampFormat()+"} for Dataset file {"+datasetSensorPrototype.getDatasetFile()+"}");
+
             }
             String record = firstRecord;
             if(datasetSensorPrototype.getExportGenerationRate()){
@@ -213,13 +228,12 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
                 else
                     log.error("Could not calculate next message time for {"+datasetSensorPrototype.getSensorPrototypeName()+"} .Confirm that timestamps are in time order ascending");
                 log.debug("woke up after "+waitTime);
-
                 record = bufferedReader.readLine().replaceAll("\"","");
             }
             log.info("DataSetSensorPrototype {"+datasetSensorPrototype+"} has finished");
             finished = true;
         }catch (Exception exception){
-            log.error(EXCEPTION_CAUGHT + " while trying to read Dataset file {"+datasetSensorPrototype.getDatasetFile()+"} is not valid for datasetSensorPrototype {"+datasetSensorPrototype.getSensorPrototypeName()+"}.DatasetSensorPrototype will be ignored.");
+            log.error(EXCEPTION_CAUGHT + " while trying to read Dataset file {"+datasetSensorPrototype.getDatasetFile()+"} is not valid for datasetSensorPrototype {"+datasetSensorPrototype.getSensorPrototypeName()+"}.DatasetSensorPrototype will be ignored.",exception);
         }
     }
 }

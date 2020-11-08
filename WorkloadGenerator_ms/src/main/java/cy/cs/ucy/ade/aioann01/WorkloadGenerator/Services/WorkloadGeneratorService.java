@@ -355,7 +355,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
                 try {
                     sensorDataProducerService.initiate(exchange, sensorMessageSendService);
                 } catch (Exception exception) {
-                    log.error("sensorPrototypeService " + sensorDataProducerService.getClass() + "could not be initiated due to :" + exception.getMessage(), exception);
+                    log.error("sensorPrototypeService " + sensorDataProducerService.getClass() + " could not be initiated due to :" + exception.getMessage(), exception);
                 }
             }
         }

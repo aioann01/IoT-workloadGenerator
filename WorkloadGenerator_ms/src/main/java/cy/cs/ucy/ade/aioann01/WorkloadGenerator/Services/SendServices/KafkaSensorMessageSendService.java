@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -35,6 +36,7 @@ public class KafkaSensorMessageSendService implements ISensorMessageSendService 
     @Override
     public void initializeServiceReceiverConfigurations(List<Server> kafkaBrokers, HashMap<String, String> configs) throws Exception {
         this.kafkaBrokers = kafkaBrokers;
+        this.kafkaProducerClients = new ArrayList<>();
         for (Server broker : kafkaBrokers) {
             this.rootTopic = configs.get(TOPIC_NAME);
             this.properties = new Properties();
