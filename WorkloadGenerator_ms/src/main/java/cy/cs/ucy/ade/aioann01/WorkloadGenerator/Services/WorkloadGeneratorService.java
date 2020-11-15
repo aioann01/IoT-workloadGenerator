@@ -242,7 +242,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
                             kafkaBrokers = mapper.readValue(kafkaBrokersJsonArray.toString(), new TypeReference<List<Server>>() {
                             });
                             if (kafkaBrokers == null || kafkaBrokers.isEmpty()) {
-                                errorMessage = " kafkaBrokers could not be created.Check logs or verify that file has valid kafkaBrokers";
+                                errorMessage = " kafkaBrokers could not be created.Check logs or verify that file has valid kafkaBrokersClusters";
                                 throw new ValidationException(errorMessage);
                             }
                         } catch (JSONException | JsonMappingException exception) {
@@ -292,10 +292,10 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
             JSONObject sensorDataConfigs = workloadGenerator.getConfigs().getJSONObject(SENSOR_DATA_CONFIGS);
             if(sensorDataConfigs.has(SENSOR_PROTOTYPES)) {
                 JSONArray sensorPrototypesJSONArray = sensorDataConfigs.getJSONArray(SENSOR_PROTOTYPES);
-                List<MockSensorPrototype> mockSensorPrototypes=new ArrayList<>();
+                List<MockSensorPrototype> mockSensorPrototypes = new ArrayList<>();
                 List<DatasetSensorPrototype> datasetSensorPrototypes = new ArrayList<>();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                for (int i=0;i<sensorPrototypesJSONArray.length();++i){
+                for (int i=0; i < sensorPrototypesJSONArray.length(); ++i){
                     JSONObject jsonObject = sensorPrototypesJSONArray.getJSONObject(i);
                     if(jsonObject.has(MOCK_SENSOR_PROTOTYPE)){
                         MockSensorPrototype mockSensorPrototype = mapper.readValue(jsonObject.getJSONObject(MOCK_SENSOR_PROTOTYPE).toString(), new TypeReference<MockSensorPrototype>(){});
@@ -408,7 +408,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
             exchange.setHttpStatus(HTTP_BAD_REQUEST);
             return;
         } else {
-            for(ISensorDataProducerService sensorDataProducerService:sensorDataProducerServices){
+            for(ISensorDataProducerService sensorDataProducerService : sensorDataProducerServices){
                 try {
                     sensorDataProducerService.terminate(exchange);
                 }catch (Exception exception){

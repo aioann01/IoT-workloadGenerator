@@ -236,11 +236,11 @@
 					"mockSensorPrototype": {
 					"outputFile":"humidity_output.csv",
 						"evaluateFieldGenerationRate":true,
-						"name": "humidity_sensor",
+						"sensorPrototypeName": "humidity_sensor",
 						"sensorsQuantity": 2,
 						"generationRate": {
 							"constant": {
-								"value": 10
+								"value": 1
 							}
 						},
 						"messagePrototype": {

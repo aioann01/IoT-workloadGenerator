@@ -113,9 +113,9 @@ public class GenerationRatesUtils {
         Random rand = new Random();
         if(type.equals(INTEGER)){
             int value;
-            NormalDistributionGenerationRate normalDistributionGenerationRate=(NormalDistributionGenerationRate)generationRateValue;
-            value= (int) (rand.nextGaussian()*normalDistributionGenerationRate.getDeviation().intValue()+normalDistributionGenerationRate.getMean().intValue());
-            return castValue(value,type);
+            NormalDistributionGenerationRate normalDistributionGenerationRate = (NormalDistributionGenerationRate)generationRateValue;
+            value = (int) (rand.nextGaussian() * normalDistributionGenerationRate.getDeviation().intValue() + normalDistributionGenerationRate.getMean().intValue());
+            return castValue(value, type);
         }
         else{
             double value;

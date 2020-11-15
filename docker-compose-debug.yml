@@ -5,7 +5,7 @@ services:
   workload-generator-ms:
     build:
       context: .
-      dockerfile: ../WorkloadGenerator_ms/Dockerfile
+      dockerfile: WorkloadGenerator_ms/Dockerfile
     volumes:
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/configs_file.json:/home/configs/configs_file.json
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/configs_file_ALL.json:/home/configs/configs_file_ALL.json
@@ -51,7 +51,7 @@ services:
   http-server:
     build:
       context: .
-      dockerfile: ../HttpServer/Dockerfile
+      dockerfile: HttpServer/Dockerfile
     environment:
       - JAVA_OPTS="-Xmx1G -Xms1G"
       - SERVER_PORT=8095
@@ -63,32 +63,55 @@ services:
       - "8005:8005"
     command: 
         java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8005 home/HttpServer-1.0.0-SNAPSHOT.jar
+    container_name: httpServer
     networks:
       - workloadGenerator-network  
-    container_name: httpServer
+    
 
 
-  #mqtt-subscriber-client-ms:
-   # build:
-    #  context: .
-     # dockerfile: MqttSubscriberClient/Dockerfile
-    #ports:
-    #  - "8094:8094"
-    #  - "8004:8004"
-    #container_name: mqttSubscriberClient_ms
-    #networks:
-    #  - workloadGenerator-network  
+  mqtt-subscriber-client-ms:
+    build:
+      context: .
+      dockerfile: MqttSubscriberClient/Dockerfile
+    environment:
+      - SERVER_PORT=8094
+      - logging.level=INFO,DEBUG,ERROR
+      - LOGGING_FILE=/home/logs/server.log
+      - logging.level.web=DEBUG
+    ports:
+      - "8094:8094"
+      - "8004:8004"
+    container_name: mqttSubscriberClient_ms
+    networks:
+      - workloadGenerator-network  
+  
+  
+  
+  kafka-subscriber-client-ms:
+    build:
+      context: .
+      dockerfile: KafkaConsumerClient/Dockerfile
+    environment:
+      - SERVER_PORT=8096
+      - logging.level=INFO,DEBUG,ERROR
+      - LOGGING_FILE=/home/logs/server.log
+      - logging.level.web=DEBUG
+    ports:
+      - "8096:8096"
+      - "8006:8006"
+    container_name: kafkaSubscriberClient_ms
+    networks:
+      - workloadGenerator-network  
   
     
-    
-  #mqtt-broker:
-  #  image: eclipse-mosquitto
-  #  ports:
-  #    - "1883:1883"
-  #    - "9001:9001"
-  #  container_name: mqttBroker
-  #  networks:
-  #    - workloadGenerator-network  
+  mqtt-broker:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    container_name: mqttBroker
+    networks:
+      - workloadGenerator-network  
   
   
   #sso-ms:

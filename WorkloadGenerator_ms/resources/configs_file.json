@@ -1,35 +1,200 @@
 {
 	"configs": {
-		"protocol": "MQTT",
+		"protocol": "HTTP",
+"httpConfigs":{
+"requestURI":"/testing",
 
-		"mqttConfigs": {
-			"topic": "home",
-			"brokerClusters": [{
-				"serverIp": "localhost",
-				"serverPort": "1883"
-			}]
+	"httpServers": [{
+			"serverIp": "localhost",
+			"serverPort": "8095"
+}]
 },
-
 		"sensorDataConfigs": {
 			"sensorPrototypes": [
-			
+				
+				
 		
 			{
 				"datasetSensorPrototype": {
 					"exportGenerationRate":"true",
 
-					"sensorPrototypeName": "beachWateQuality",
+					"sensorPrototypeName": "dataTraffic",
 					"messageExportType": "json",
-					"timestampFormat": "MM/dd/yyyy HH:mm:ss aa",
+					"timestampFormat": "yyyy-MM-dd'T'HH:mm:ss",
 					"timestampedDataset": "true",
-					"sortedDataset": "false",
-					"datasetFile": "beach-water-quality-automated-sensors-1.csv",
-					"timestampColumnName": "Measurement Timestamp",
-					"sensorIdColumnName": "Beach Name"
+					"sortedDataset": "true",
+					"datasetFile": "trafficData158324.csv",
+					"timestampColumnName": "TIMESTAMP",
+					"sensorIdColumnName": "_id"
 				}
 						
-			}
-								]
+			},
+				{
+					"mockSensorPrototype": {
+					"outputFile":"humidity_output.csv",
+						"evaluateFieldGenerationRate":true,
+						"sensorPrototypeName": "humidity_sensor",
+						"sensorsQuantity": 2,
+						"generationRate": {
+							"random": {
+							"minValue": 0,
+							"maxValue": 4
+						}
+						},
+						"messagePrototype": {
+							"type": "json",
+							"fieldsPrototypes": [{
+								"name": "humidity",
+								"type": "double",
+								"value": {
+									"normalDistribution": {
+										"mean": 20.0,
+										"deviation": 5.0
+									}
+								},
+								"unit": "%"
+							},
+							{
+								"name": "String",
+								"type": "String",
+								"value": {
+									"constant":{
+									"value":"\"LOL\" is the name"}
+								},
+								"unit": "%"
+							}]
+						}
+					}
+				},
+					
+					{"mockSensorPrototype": {
+					"outputFile":"proximity_output.csv",
+						"evaluateFieldGenerationRate":true,
+						"description": "Sensor that calculates the proximity within the target to detect if an object is in the way",
+						"sensorPrototypeName": "proximity_sensor",
+						"sensorsQuantity": 3,
+						"generationRate": {
+							"constant": {
+								"value": 5
+							}
+						},
+						"messagePrototype": {
+							"type": "xml",
+							"fieldsPrototypes": [{
+									"name": "distance",
+									"type": "double",
+									"value": {
+										"distributions": [{
+												"minValue": 0,
+												"maxValue": 2.0,
+												"probability": 0.05
+											},
+											{
+												"minValue": 2.0,
+												"maxValue": 5.0,
+												"probability": 0.25
+											},
+											{
+												"minValue": 5.0,
+												"maxValue": 10.0,
+												"probability": 0.7
+											}
+										]
+									},
+									"unit": "m"
+								},
+								{
+								"name": "String",
+								"type": "String",
+								"value": {
+									"constant":{
+									"value":"\"LOL\" is the name"}
+								},
+								"unit": "%"
+							},
+								{
+									"name": "complexSensor",
+									"type": "object",
+									"value": [{
+											"name": "field1",
+											"type": "boolean",
+											"value": {
+												"distributions": [{
+														"value": true,
+														"probability": 0.1
+													},
+													{
+														"value": false,
+														"probability": 0.9
+													}
+												]
+											}
+										},
+										{
+											"name": "field2",
+											"type": "object",
+											"value": [{
+													"name": "field2_1",
+													"type": "double",
+													"value": {
+														"normalDistribution": {
+															"mean": 20.0,
+															"deviation": 5.0
+														}
+													},
+													"unit": "%"
+												},
+												{
+													"name": "field2_2",
+													"type": "integer",
+													"value": {
+														"distributions": [{
+																"minValue": 10,
+																"maxValue": 20,
+																"probability": 0.3
+															},
+															{
+																"minValue": 20,
+																"maxValue": 30,
+																"probability": 0.5
+															},
+															{
+																"minValue": 30,
+																"maxValue": 40,
+																"probability": 0.2
+															}
+														]
+													},
+													"unit": "degrees celcium"
+												},
+												{
+													"name": "field2_3",
+													"type": "double",
+													"value": {
+														"random": {
+															"minValue": 10.0,
+															"maxValue": 20.0
+														}
+													},
+													"unit": "pa"
+												},
+												{
+													"name": "field2_4",
+													"type": "double",
+													"value": {
+														"constant": {
+															"value": 2.5
+														}
+													}
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					}
+				}]
 		}
 
 

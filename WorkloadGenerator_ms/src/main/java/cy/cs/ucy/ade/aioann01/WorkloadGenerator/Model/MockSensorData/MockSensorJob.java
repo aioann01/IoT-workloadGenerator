@@ -11,6 +11,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.MqttSensor
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.Timestamp;
@@ -86,12 +87,12 @@ public class MockSensorJob implements Runnable{
     public void sendMessage()throws RuntimeException{
         String message = SensorUtils.createMessage(mockSensor.getMockSensorPrototype().getMessagePrototype(), this.sensorFieldStatistics, this.mockSensor.getMockSensorPrototype().getEvaluateFieldGenerationRate());
 
-
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date;
+        Integer waitTime = 0;
         try {
             date = new Date();
-            int waitTime = (Integer)GenerationRatesUtils.generateGenerationRateValue(this.mockSensor.getMockSensorPrototype().getGenerationRate(), TypesEnum.INTEGER, this.mockSensor.getMockSensorPrototype().getGenerationRateType());
+             waitTime = (Integer)GenerationRatesUtils.generateGenerationRateValue(this.mockSensor.getMockSensorPrototype().getGenerationRate(), TypesEnum.INTEGER, this.mockSensor.getMockSensorPrototype().getGenerationRateType());
 
             // Random rand = new Random();
             // ConstantGenerationRate l = (ConstantGenerationRate) mockSensor.getMockSensorPrototype().getGenerationRate();
@@ -100,10 +101,12 @@ public class MockSensorJob implements Runnable{
             //Thread.sleep(1000*rnd);//TimeUnit.SECONDS.sleep(rnd);
             //   Thread.sleep((Integer) l.getValue()*1000);//seconds to ms
             //log.debug("WAIT TIME FOR {"+ this.mockSensor.getId()+"} is:" + waitTime);
+            if(waitTime < 0)
+                waitTime = 0;
             Thread.sleep(waitTime * 1000);//seconds to ms
 
         }catch (Exception e){
-            log.error("Could not calculate generation rate for sensor");
+            log.error("Could not calculate generation rate for sensor:" + mockSensor.getMockSensorPrototype().getSensorPrototypeName(), e);
         }
         date = new Date();
         Timestamp ts = new Timestamp(date.getTime());
@@ -114,17 +117,16 @@ public class MockSensorJob implements Runnable{
             newRecord.setDate(formatter.format(date));
             newRecord.setTimestamp(ts.toString());
             newRecord.setSensorId(mockSensor.getId());
-            newRecord.setMessage(message
-                    /*"ThreadId:["+Thread.currentThread().getId()+"] |ThreadName:["+Thread.currentThread().getName()+"] Sensor with id: "+id+" says hello!"*/);
+            newRecord.setMessage(message);
             newRecord.setMockSensorPrototypeName(mockSensor.getMockSensorPrototype().getSensorPrototypeName());
             writerThread.getBlockingDeque().add(newRecord);
         }
         try {
             SensorMessageEnum contentType = getMockSensor().getMockSensorPrototype().getMessagePrototype().getSensorMessageType();
             String sensorId = getMockSensor().getId();
-           // log.trace("Sending message: "+message+" for sensorId {"+mockSensor.getId()+"}");
+            log.trace("Sending message: " + message + " for sensorId {" + mockSensor.getId() + "} WaitTime was:"+waitTime);
             if(sensorMessageSendService instanceof MqttSensorMessageSendService)
-                sensorMessageSendService.sendMessage(getMockSensor().getMockSensorPrototype().getSensorPrototypeName()+"/"+ mockSensor.getId(),message, contentType);
+                sensorMessageSendService.sendMessage(getMockSensor().getMockSensorPrototype().getSensorPrototypeName() + "/" +  mockSensor.getId(),message, contentType);
             else if(sensorMessageSendService instanceof KafkaSensorMessageSendService){
                 sensorMessageSendService.sendMessage(getMockSensor().getMockSensorPrototype().getSensorPrototypeName(), message, contentType);
             }

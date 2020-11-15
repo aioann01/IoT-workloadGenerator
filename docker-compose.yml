@@ -5,7 +5,7 @@ services:
   workload-generator-ms:
     build:
       context: .
-      dockerfile: ../WorkloadGenerator_ms/Dockerfile
+      dockerfile: WorkloadGenerator_ms/Dockerfile
     volumes:
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/configs_file_ALL.json:/home/configs/configs_file.json
       - /c/Users/andre/Dev/WorkloadGenerator/WorkloadGenerator_ms/resources/configs_file_ALL.json:/home/configs/configs_file_ALL.json
@@ -49,7 +49,7 @@ services:
   http-server:
     build:
       context: .
-      dockerfile: ../HttpServer/Dockerfile
+      dockerfile: HttpServer/Dockerfile
     environment:
       - server.port=8095
       - logging.level=INFO,DEBUG,ERROR

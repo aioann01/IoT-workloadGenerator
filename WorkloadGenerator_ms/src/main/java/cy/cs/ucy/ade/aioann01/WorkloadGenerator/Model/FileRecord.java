@@ -1,5 +1,8 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model;
 
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputFileEnum;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
+
 import java.util.Date;
 
 public class FileRecord {

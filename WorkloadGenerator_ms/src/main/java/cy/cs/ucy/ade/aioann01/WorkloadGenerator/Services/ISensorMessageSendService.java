@@ -11,7 +11,7 @@ public interface ISensorMessageSendService {
 
      void initializeServiceReceiverConfigurations(List<Server> httpServers, HashMap<String,String> configs) throws Exception;
 
-     void sendMessage(String sensorId, String message, SensorMessageEnum contextType) throws Exception;
+     void sendMessage(String sensorId, String message, SensorMessageEnum contentType) throws Exception;
 
      void terminate() throws Exception;
 

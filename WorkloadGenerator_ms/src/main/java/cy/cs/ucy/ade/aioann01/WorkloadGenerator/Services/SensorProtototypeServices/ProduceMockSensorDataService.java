@@ -102,7 +102,7 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
                     .filter(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype().getOutputFile() != null)
                     .forEach(mockSensorPrototypeJob ->{
                         try{
-                            workloadGenerator.getWriterThread().addMockSensorPrototypeOutputFileInfo(mockSensorPrototypeJob.getMockSensorPrototype().getSensorPrototypeName(),mockSensorPrototypeJob.getMockSensorPrototype().getOutputFile());}
+                            workloadGenerator.getWriterThread().addMockSensorPrototypeOutputFileInfo(mockSensorPrototypeJob.getMockSensorPrototype());}
                         catch (Exception exception){
                             log.error(EXCEPTION_CAUGHT+"while creating filewriter for outpuf file for mockSensorPrototype {"+mockSensorPrototypeJob.getMockSensorPrototypeName()+"}. Will not export to outpuf file for this mockSensorPortotype.",exception);
                         }}
@@ -196,7 +196,7 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 //                workloadGenerator.setInitialized(true);
         }catch (Exception exception){
             if(exception instanceof IOException){
-                errorMessage="Could not create file for ouptut";
+                errorMessage = "Could not create file for ouptut";
             }else
                 errorMessage = exception.getMessage();
 //            exchange.setHttpStatus(HTTP_INTERNAL_SERVER_ERROR);

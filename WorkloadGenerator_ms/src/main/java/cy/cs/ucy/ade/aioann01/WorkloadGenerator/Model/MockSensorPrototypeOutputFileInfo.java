@@ -1,6 +1,7 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputFileEnum;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 
 import java.io.FileWriter;
 
@@ -13,6 +14,26 @@ public class MockSensorPrototypeOutputFileInfo {
     private OutputFileEnum outputFileEnum;
 
     private FileWriter fileWriter;
+
+    private String[] sensorMessageFieldNames;
+
+    private SensorMessageEnum sensorMessageEnum;
+
+    public SensorMessageEnum getSensorMessageEnum() {
+        return sensorMessageEnum;
+    }
+
+    public void setSensorMessageEnum(SensorMessageEnum sensorMessageEnum) {
+        this.sensorMessageEnum = sensorMessageEnum;
+    }
+
+    public String[] getSensorMessageFieldNames() {
+        return sensorMessageFieldNames;
+    }
+
+    public void setSensorMessageFieldNames(String[] sensorMessageFieldNames) {
+        this.sensorMessageFieldNames = sensorMessageFieldNames;
+    }
 
     public FileWriter getFileWriter() {
         return fileWriter;

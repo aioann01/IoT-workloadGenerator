@@ -146,7 +146,7 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
             long waitTime = 0;
             try {
                 if(datasetSensorPrototype.getTimestampedDataset()){
-                    if(!datasetSensorPrototype.isSortedDataset())
+                    //if(!datasetSensorPrototype.isSortedDataset())
 //                        formatter = new SimpleDateFormat(SIMPLE_DATE_FORMAT_FOR_SORTED_CSV);
 //                    else
                         formatter = new SimpleDateFormat(datasetSensorPrototype.getTimestampFormat());

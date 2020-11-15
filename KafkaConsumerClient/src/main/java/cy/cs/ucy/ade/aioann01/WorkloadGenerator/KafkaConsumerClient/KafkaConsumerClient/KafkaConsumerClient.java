@@ -26,8 +26,10 @@ public class KafkaConsumerClient {
     private static final String TESTING_SENSOR_SENSOR_TOPIC = "home/testing_sensor";
     private List<String> topics;
     {
-        topics =new ArrayList<>();
+        topics = new ArrayList<>();
+       // topics.add("home/#");
         topics.add("home");
+
 //        topics.add(PROXIMITY_SENSOR_TOPIC);
 //        topics.add(MOTION_DETECTION_SENSOR_TOPIC);
 //        topics.add(HUMIDITY_SENSOR_TOPIC);

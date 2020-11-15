@@ -1,19 +1,34 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputFileEnum;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.FieldPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.FileRecord;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorPrototypeOutputFileInfo;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.stream.Collectors;
 
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputFileEnum.CSV;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputFileEnum.TXT;
@@ -41,10 +56,13 @@ public class WriterThread extends Thread {
 
     }
 
-    public void addMockSensorPrototypeOutputFileInfo(String mockSensorPrototypeName , String mockSensorPrototypeOutputFilename) throws IOException,Exception {
-        String fileTokens[] = mockSensorPrototypeOutputFilename.split("\\.");
+    public void addMockSensorPrototypeOutputFileInfo(MockSensorPrototype mockSensorPrototype) throws IOException,Exception {
+        String fileTokens[] = mockSensorPrototype.getOutputFile().split("\\.");
         MockSensorPrototypeOutputFileInfo mockSensorPrototypeOutputFileInfo = new MockSensorPrototypeOutputFileInfo();
-        if(fileTokens[1]==null)
+        mockSensorPrototypeOutputFileInfo.setFilename(mockSensorPrototype.getOutputFile());
+        mockSensorPrototypeOutputFileInfo.setFileWriter(new FileWriter(mockSensorPrototype.getOutputFile()));
+        mockSensorPrototypeOutputFileInfo.setSensorMessageEnum(mockSensorPrototype.getMessagePrototype().getSensorMessageType());
+        if(fileTokens[1] == null)
             throw new Exception("No extension has been provided for output file. Provide one of {.csv, .txt}");
         else{
             if (fileTokens[1].equals(TEXT_EXTENSION)) {
@@ -53,13 +71,19 @@ public class WriterThread extends Thread {
             } else if (fileTokens[1].equals(EXCEL_FILENAME)) {
                 mockSensorPrototypeOutputFileInfo.setOutputFileEnum(CSV);
                 mockSensorPrototypeOutputFileInfo.setMessageFieldsSeperator(EXCEL_COLUMN_SEPERATOR);
+                mockSensorPrototypeOutputFileInfo.getFileWriter().write("Timestamp,SensorId,");
+                List<String> sensorMessageFieldNames = mockSensorPrototype.getMessagePrototype().getFieldsPrototypes()
+                        .stream()
+                        .map(fieldPrototype -> fieldPrototype.getName())
+                        .collect(Collectors.toList());
+                mockSensorPrototypeOutputFileInfo.setSensorMessageFieldNames(sensorMessageFieldNames.toArray(new String[0]));
+                mockSensorPrototypeOutputFileInfo.getFileWriter().write(String.join( ",", sensorMessageFieldNames)+ "\n");
+                mockSensorPrototypeOutputFileInfo.getFileWriter().flush();
             } else {
                 throw new Exception("Unsupported output file format. Supported file formats are : {.csv, .txt}");
             }
         }
-        mockSensorPrototypeOutputFileInfo.setFilename(mockSensorPrototypeOutputFilename);
-        mockSensorPrototypeOutputFileInfo.setFileWriter(new FileWriter(mockSensorPrototypeOutputFilename));
-        this.mockSensorPrototypesOutputFileInfoMap.put(mockSensorPrototypeName,mockSensorPrototypeOutputFileInfo);
+        this.mockSensorPrototypesOutputFileInfoMap.put(mockSensorPrototype.getSensorPrototypeName(), mockSensorPrototypeOutputFileInfo);
     }
     public synchronized void  terminate() throws  IOException {
 
@@ -130,36 +154,21 @@ public class WriterThread extends Thread {
                     try {
                         newRecord = blockingDeque.take();
                     } catch (InterruptedException e) {
-                        log.error(UNEXPECTED_ERROR_OCCURRED+e.getMessage(),e);
+                        log.error(UNEXPECTED_ERROR_OCCURRED + e.getMessage(), e);
                         throw new RuntimeException(e.getMessage());
                     }
-                    try {
-                        MockSensorPrototypeOutputFileInfo mockSensorPrototypeOutputFileInfo = this.mockSensorPrototypesOutputFileInfoMap.get(newRecord.getMockSensorPrototypeName());
-                        StringBuilder record = new StringBuilder();
-                        record.append(newRecord.getDate()+mockSensorPrototypeOutputFileInfo.getMessageFieldsSeperator());
-                        record.append(newRecord.getSensorId()+mockSensorPrototypeOutputFileInfo.getMessageFieldsSeperator());
-                        if(mockSensorPrototypeOutputFileInfo.getOutputFileEnum().equals(CSV)){
-                            try {
-                                JSONObject messageJSONObject = new JSONObject(newRecord.getMessage().toString().trim());
-                                Iterator<String> keys = messageJSONObject.keys();
-                                while(keys.hasNext()) {
-                                    String key = keys.next();
-//                                if (messageJSONObject.get(key) instanceof JSONObject) {
-//                                    record.append(messageJSONObject.get(key));
-//                                }
-//                                else
-                                    record.append(messageJSONObject.get(key));
-                                    if(keys.hasNext())
-                                        record.append(mockSensorPrototypeOutputFileInfo.getMessageFieldsSeperator());
-                                }
-                            }catch (Exception exception){
-                                record.append("\""+newRecord.getMessage()+"\"");//Message is not JSONObject. Will write the record in
-                            }}
-                        else
-                            record.append("\""+newRecord.getMessage()+"\"");//For not CSV output file formats we print the message as it is created
 
+                    MockSensorPrototypeOutputFileInfo mockSensorPrototypeOutputFileInfo = this.mockSensorPrototypesOutputFileInfoMap.get(newRecord.getMockSensorPrototypeName());
+                    String record = null;
+                    try {
+                        record = SensorUtils.createCSVOutputRecord(mockSensorPrototypeOutputFileInfo, newRecord);
+                    } catch (Exception e) {
+
+                    }
+
+                    try{
                         //  fileWriter.write(newRecord.getDate()+" "+newRecord.getMessage()+"\n");
-                        mockSensorPrototypeOutputFileInfo.getFileWriter().write(record.toString()+"\n");
+                        mockSensorPrototypeOutputFileInfo.getFileWriter().write(record+"\n");
                         mockSensorPrototypeOutputFileInfo.getFileWriter().flush();
 
                     } catch (IOException e) {
