@@ -1,2 +1,4 @@
-kafka-docker-master/*
+/kafka-docker-master
 *.zip
+/.git
+*_BAK

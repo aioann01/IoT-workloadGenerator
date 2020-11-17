@@ -2,32 +2,33 @@
 	"configs": {
 		"protocol": "HTTP",
 
-			"httpConfigs":{
-		"requestURI":"testing",
-		"httpServers": [{
-			"serverIp": "http-server",
-			"serverPort": "8095"
-		}]},
+		"httpConfigs": {
+			"requestURI": "testing",
+			"httpServers": [{
+				"serverIp": "http-server",
+				"serverPort": "8095"
+			}]
+		},
 
 		"sensorDataConfigs": {
-			"sensorPrototypes": [
-			{
-				"datasetSensorPrototype": {
-					"exportGenerationRate":"true",
+			"sensorPrototypes": [{
+					"datasetSensorPrototype": {
+						"exportGenerationRate": "true",
 
-					"sensorPrototypeName": "taxi",
-					"messageExportType": "json",
-					"timestampFormat": "yyyy-MM-dd HH:mm:ss",
-					"timestampedDataset": "true",
-					"sortedDataset": "false",
-					"datasetFile": "taxi.csv",
-					"timestampColumnName": "tpep_pickup_datetime",
-				"generationRate": {
+						"sensorPrototypeName": "taxi",
+						"messageExportType": "json",
+						"timestampFormat": "yyyy-MM-dd HH:mm:ss",
+						"timestampedDataset": "true",
+						"sortedDataset": "false",
+						"datasetFile": "taxi.csv",
+						"timestampColumnName": "tpep_pickup_datetime",
+						"generationRate": {
 							"constant": {
 								"value": 2
-							}},
-					"sensorIdColumnName": "VendorID",
-					"messagePrototype": {
+							}
+						},
+						"sensorIdColumnName": "VendorID",
+						"messagePrototype": {
 							"type": "json",
 							"fieldsPrototypes": [{
 								"name": "BusDriverAge",
@@ -37,31 +38,31 @@
 										"minValue": 30.0,
 										"maxValue": 50.0
 									}
-									
+
 								},
 								"unit": "years old"
 							}]
 
 						}
-				}
+					}
 				},
-				
-					{
-				"datasetSensorPrototype": {
-					"exportGenerationRate":"true",
 
-					"sensorPrototypeName": "dataTraffic",
-					"messageExportType": "xml",
-					"timestampFormat": "yyyy-MM-dd'T'HH:mm:ss",
-					"timestampedDataset": "true",
-					"sortedDataset": "true",
-					"datasetFile": "trafficData158324.csv",
-					"timestampColumnName": "TIMESTAMP",
-					"sensorIdColumnName": "_id"
-				}
-						
-			},
-					{
+				{
+					"datasetSensorPrototype": {
+						"exportGenerationRate": "true",
+
+						"sensorPrototypeName": "dataTraffic",
+						"messageExportType": "xml",
+						"timestampFormat": "yyyy-MM-dd'T'HH:mm:ss",
+						"timestampedDataset": "true",
+						"sortedDataset": "true",
+						"datasetFile": "trafficData158324.csv",
+						"timestampColumnName": "TIMESTAMP",
+						"sensorIdColumnName": "_id"
+					}
+
+				},
+				{
 					"datasetSensorPrototype": {
 						"exportGenerationRate": "true",
 
@@ -80,10 +81,11 @@
 						}
 					}
 				},
-				{
+
+				{
 					"mockSensorPrototype": {
-					"outputFile":"proximity_output.csv",
-						"evaluateFieldGenerationRate":true,
+						"outputFile": "proximity_output.csv",
+						"evaluateFieldGenerationRate": true,
 						"description": "Sensor that calculates the proximity within the target to detect if an object is in the way",
 						"sensorPrototypeName": "proximity_sensor",
 						"sensorsQuantity": 3,
@@ -202,8 +204,8 @@
 				},
 				{
 					"mockSensorPrototype": {
-"outputFile":"motion_detection_output.csv",
-						"evaluateFieldGenerationRate":true,
+						"outputFile": "motion_detection_output.csv",
+						"evaluateFieldGenerationRate": true,
 						"sensorPrototypeName": "motion_detection_sensor",
 						"description": "Sensor that detects  movement and return true if motion or false if no motion",
 						"sensorsQuantity": 1,
@@ -234,8 +236,8 @@
 				},
 				{
 					"mockSensorPrototype": {
-					"outputFile":"humidity_output.csv",
-						"evaluateFieldGenerationRate":true,
+						"outputFile": "humidity_output.csv",
+						"evaluateFieldGenerationRate": true,
 						"sensorPrototypeName": "humidity_sensor",
 						"sensorsQuantity": 2,
 						"generationRate": {
@@ -261,8 +263,8 @@
 				},
 				{
 					"mockSensorPrototype": {
-					"outputFile":"temperature_output.csv",
-						"evaluateFieldGenerationRate":true,
+						"outputFile": "temperature_output.csv",
+						"evaluateFieldGenerationRate": true,
 						"sensorPrototypeName": "temperature_sensor",
 						"sensorsQuantity": 1000,
 						"generationRate": {
@@ -300,8 +302,8 @@
 				},
 				{
 					"mockSensorPrototype": {
-					"outputFile":"pressure_output.csv",
-						"evaluateFieldGenerationRate":true,
+						"outputFile": "pressure_output.csv",
+						"evaluateFieldGenerationRate": true,
 						"sensorPrototypeName": "pressure_sensor",
 						"sensorsQuantity": 1,
 						"generationRate": {

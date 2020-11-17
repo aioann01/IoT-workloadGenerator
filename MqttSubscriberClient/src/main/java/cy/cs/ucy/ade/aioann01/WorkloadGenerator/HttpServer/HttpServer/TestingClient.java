@@ -18,6 +18,6 @@ public class TestingClient  {
 
     @EventListener(ApplicationReadyEvent.class)
     public static void main(String [] args) throws MqttException, URISyntaxException {
-        Subscriber subscriber = new Subscriber("https://127.0.0.1:1883");
+        Subscriber subscriber = new Subscriber("https://mqtt-broker:1883");
     }
 }
