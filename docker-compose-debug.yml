@@ -69,49 +69,49 @@ services:
     
 
 
-  mqtt-subscriber-client-ms:
-    build:
-      context: .
-      dockerfile: MqttSubscriberClient/Dockerfile
-    environment:
-      - SERVER_PORT=8094
-      - logging.level=INFO,DEBUG,ERROR
-      - LOGGING_FILE=/home/logs/server.log
-      - logging.level.web=DEBUG
-    ports:
-      - "8094:8094"
-      - "8004:8004"
-    container_name: mqttSubscriberClient_ms
-    networks:
-      - workloadGenerator-network  
+ # mqtt-subscriber-client-ms:
+ #   build:
+ #     context: .
+ #     dockerfile: MqttSubscriberClient/Dockerfile
+ #   environment:
+ #     - SERVER_PORT=8094
+ #     - logging.level=INFO,DEBUG,ERROR
+ #     - LOGGING_FILE=/home/logs/server.log
+ #     - logging.level.web=DEBUG
+ #   ports:
+ #     - "8094:8094"
+ #     - "8004:8004"
+ #   container_name: mqttSubscriberClient_ms
+  #  networks:
+  #    - workloadGenerator-network  
   
   
   
-  kafka-subscriber-client-ms:
-    build:
-      context: .
-      dockerfile: KafkaConsumerClient/Dockerfile
-    environment:
-      - SERVER_PORT=8096
-      - logging.level=INFO,DEBUG,ERROR
-      - LOGGING_FILE=/home/logs/server.log
-      - logging.level.web=DEBUG
-    ports:
-      - "8096:8096"
-      - "8006:8006"
-    container_name: kafkaSubscriberClient_ms
-    networks:
-      - workloadGenerator-network  
+  #kafka-subscriber-client-ms:
+  #  build:
+  #    context: .
+  #    dockerfile: KafkaConsumerClient/Dockerfile
+  #  environment:
+  #    - SERVER_PORT=8096
+  #    - logging.level=INFO,DEBUG,ERROR
+  #    - LOGGING_FILE=/home/logs/server.log
+  #    - logging.level.web=DEBUG
+  #  ports:
+  #    - "8096:8096"
+  #    - "8006:8006"
+  #  container_name: kafkaSubscriberClient_ms
+  #  networks:
+  #    - workloadGenerator-network  
   
     
-  mqtt-broker:
-    image: eclipse-mosquitto
-    ports:
-      - "1883:1883"
-      - "9001:9001"
-    container_name: mqttBroker
-    networks:
-      - workloadGenerator-network  
+ # mqtt-broker:
+ #   image: eclipse-mosquitto
+ #   ports:
+  #    - "1883:1883"
+ #     - "9001:9001"
+  #  container_name: mqttBroker
+  #  networks:
+  #    - workloadGenerator-network  
   
   
   #sso-ms:

@@ -32,18 +32,18 @@ public class ExchangeResponseBodyAdvice<T>   implements ResponseBodyAdvice<Objec
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
                                   ServerHttpResponse response) {
         System.out.println("In beforeBodyWrite() method of " + getClass().getSimpleName());
-        if(returnType.getParameterType() ==Exchange.class){
-            Exchange exchange=(Exchange)controllerResponse;
-            HttpStatus httpStatus=exchange.getHttpStatus();
+        if(returnType.getParameterType() == Exchange.class){
+            Exchange exchange = (Exchange)controllerResponse;
+            HttpStatus httpStatus = exchange.getHttpStatus();
             response.setStatusCode(httpStatus);
-            if(!(httpStatus==HTTP_SUCCESS||httpStatus==HTTP_CREATED||httpStatus==HTTP_NO_CONTENT)){
+            if(!(httpStatus == HTTP_SUCCESS || httpStatus == HTTP_CREATED || httpStatus == HTTP_NO_CONTENT)){
                 String errorMessageType=(String)exchange.getProperty(ERROR_MESSAGE_TYPE,String.class);
                 String exchangeErrorMessage=(String)exchange.getProperty(ERROR_MESSAGE);
-                String errorMessage=errorMessageType==null?exchangeErrorMessage:errorMessageType+":"+exchangeErrorMessage;
-                ResponseMessage responseMessage=new ResponseMessage(errorMessage);
+                String errorMessage=errorMessageType == null ? exchangeErrorMessage:errorMessageType+":"+exchangeErrorMessage;
+                ResponseMessage responseMessage = new ResponseMessage(errorMessage);
                 exchange.setBody(responseMessage);}
-            return    exchange.getBody();}
-        else if (returnType.getParameterType() ==ResponseEntity.class){
+            return  exchange.getBody();}
+        else if (returnType.getParameterType() == ResponseEntity.class){
             if(controllerResponse instanceof HashMap)
             {
                 HashMap<String, Object> responseFields = (HashMap<String, Object>) controllerResponse;

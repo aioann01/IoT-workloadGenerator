@@ -15,6 +15,9 @@ public class FilterConfigs {
         FilterRegistrationBean<JwtRequestFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new JwtRequestFilter());
         registrationBean.addUrlPatterns("/workloadGenerator/*");
+        registrationBean.addUrlPatterns("/mockSensorPrototypes/*");
+        registrationBean.addUrlPatterns("/mockSensors/*");
+
         return registrationBean;
 
 

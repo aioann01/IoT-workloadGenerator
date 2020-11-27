@@ -53,12 +53,12 @@ public class MockSensorController {
     public Exchange getMockSensor(Exchange exchange,@PathVariable(value = "mockSensorId" ,required = true) String mockSensorId) {
         log.info("Retrieving mockSensor");
         try {
-            if(mockSensorId==null){
+            if(mockSensorId == null){
                 Utils.buildValidationException(exchange,"Mandatory path parameter {mockSensorId} has not been provided",VALIDATION_ERROR);
             }
             exchange.setProperty(MOCK_SENSOR_ID,mockSensorId);
-            workloadGeneratorService.prepareRequest(exchange,MOCK_SENSORS_ENDPOINT,GET_OPERATION);
-            String requestUrl= (String)(exchange.getProperty(REQUEST_URI));
+            workloadGeneratorService.prepareRequest(exchange, MOCK_SENSORS_ENDPOINT,GET_OPERATION);
+            String requestUrl = (String)(exchange.getProperty(REQUEST_URI));
             workloadGeneratorService.sendRequest(exchange,requestUrl);
             MockSensor mockSensor = (MockSensor)exchange.getBody();
         }catch ( ValidationException ve){

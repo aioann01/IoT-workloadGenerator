@@ -1,0 +1,15 @@
+Timestamp,SensorId,temperature_in_celcius,temperature_in_farenheit
+27/11/2020 13:15:09,temperature_sensor_0,18.2_°C,68.74_°F
+27/11/2020 13:15:09,temperature_sensor_1,30.09_°C,68.8_°F
+27/11/2020 13:15:14,temperature_sensor_1,22.75_°C,78.25_°F
+27/11/2020 13:15:14,temperature_sensor_0,19.9_°C,64.73_°F
+27/11/2020 13:15:19,temperature_sensor_1,50.51_°C,55.85_°F
+27/11/2020 13:15:19,temperature_sensor_0,30.49_°C,79.22_°F
+27/11/2020 13:15:24,temperature_sensor_1,51.39_°C,71.84_°F
+27/11/2020 13:15:24,temperature_sensor_0,22.38_°C,71.61_°F
+27/11/2020 13:15:29,temperature_sensor_0,40.72_°C,76.08_°F
+27/11/2020 13:15:29,temperature_sensor_1,19.8_°C,54.47_°F
+27/11/2020 13:15:34,temperature_sensor_0,42.45_°C,83.1_°F
+27/11/2020 13:15:34,temperature_sensor_1,14.01_°C,74.41_°F
+27/11/2020 13:15:39,temperature_sensor_0,18.04_°C,54.41_°F
+27/11/2020 13:15:39,temperature_sensor_1,19.78_°C,57.32_°F

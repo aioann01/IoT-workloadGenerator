@@ -2,11 +2,14 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServi
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.GenerationRate.GenerationRateWrapper;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.SuccessResponseMessage;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensor;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensorJob;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldValueInfo;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioManager;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.MockSensorJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensorPrototypeJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.WriterThread;
@@ -15,9 +18,8 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendServi
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorPrototypeService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,9 +36,9 @@ import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorCo
 @Service
 public class ProduceMockSensorDataService implements ISensorDataProducerService {
 
-    private static final Logger log= LoggerFactory.getLogger(ProduceMockSensorDataService.class);
+    private static final Logger log = LoggerFactory.getLogger(ProduceMockSensorDataService.class);
 
-    private ObjectMapper mapper=new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     private MockSensorPrototypeService mockSensorPrototypeService;
 
@@ -47,6 +49,8 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
     private ISensorMessageSendService sensorMessageSendService;
 
     private List<MockSensorPrototype> mockSensorPrototypes;
+
+    private ScenarioManager scenarioManager;
 
 
     private Boolean startedProducing = false;
@@ -64,23 +68,21 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
     public void createMockSensors(Exchange exchange) throws Exception{
         log.debug("Entered createSensors()");
         String errorMessage;
-
         List<MockSensorPrototypeJob> mockSensorPrototypeJobs;
         List<MockSensor> mockSensors;
-
         try {
             mockSensorPrototypeJobs = mockSensorPrototypes.stream()
                     .map(sensorPrototype -> new MockSensorPrototypeJob(sensorPrototype))
                     .collect(Collectors.toList());
         }catch (Exception  exception) {
-            errorMessage="Couldn't create MockSensorJobs from  mockSensorPrototypes ";
-            log.error(EXCEPTION_CAUGHT+errorMessage+"-"+exception.getMessage(),exception);
+            errorMessage = "Couldn't create MockSensorJobs from  mockSensorPrototypes ";
+            log.error(EXCEPTION_CAUGHT + errorMessage+"-"+exception.getMessage(), exception);
             throw new Exception(errorMessage);}
         try{
             for(MockSensorPrototypeJob mockSensorPrototypeJob : mockSensorPrototypeJobs)
                 SensorUtils.createSensorPrototypeMessagePrototype(mockSensorPrototypeJob.getMockSensorPrototype());
-            if(mockSensorPrototypeJobs == null|| mockSensorPrototypeJobs.isEmpty()){
-                errorMessage="mockSensorJobs could not be created.Pleas Check logs or verify that file has valid sensors";
+            if(mockSensorPrototypeJobs == null || mockSensorPrototypeJobs.isEmpty()){
+                errorMessage = "mockSensorJobs could not be created.Pleas Check logs or verify that file has valid sensors";
                 throw new Exception(errorMessage);
             }
             Optional<Boolean> createWriterThreadOptional = mockSensorPrototypeJobs.stream()
@@ -96,11 +98,10 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
             }
             else {
                 workloadGenerator.setWriteToOutputFile(false);
-
             }
             mockSensorPrototypeJobs.stream()
                     .filter(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype().getOutputFile() != null)
-                    .forEach(mockSensorPrototypeJob ->{
+                    .forEach(mockSensorPrototypeJob -> {
                         try{
                             workloadGenerator.getWriterThread().addMockSensorPrototypeOutputFileInfo(mockSensorPrototypeJob.getMockSensorPrototype());}
                         catch (Exception exception){
@@ -118,20 +119,93 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
             mockSensorService.addAllMockSensors(mockSensors);
-            mockSensorPrototypes= mockSensorPrototypeJobs.stream()
+            mockSensorPrototypes = mockSensorPrototypeJobs.stream()
                     .map(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype())
                     .collect(Collectors.toList());
             mockSensorPrototypeService.addAllMockSensorPrototype(mockSensorPrototypes);
             workloadGenerator.setMockSensorPrototypeJobs(mockSensorPrototypeJobs);
         }catch (Exception exception){
-            errorMessage="Couldn't create mockSensors from  mockSensorPrototypes ";
-            log.error(EXCEPTION_CAUGHT+errorMessage+"-"+exception.getMessage(),exception);
+            errorMessage = "Couldn't create mockSensors from  mockSensorPrototypes ";
+            log.error(EXCEPTION_CAUGHT + errorMessage + "-" + exception.getMessage(), exception);
             throw new Exception(errorMessage);
         }
-
     }
 
 
+    private List<Scenario> processValidScenarios(MockSensorPrototype mockSensorPrototype){
+        List<Scenario> validScenarios = new ArrayList<>();
+        for(Scenario scenario: mockSensorPrototype.getScenarios()){
+            if(scenario.getScenarioName() == null){
+                log.warn("Found scenario without Name. Scenario will be ignored. Scenario Name field is mandatory");
+                continue;
+            }
+            if(scenario.getScenarioDelay() == null || scenario.getScenarioDuration() == null){
+                log.warn("Delay or duration for scenario {"+scenario.getScenarioName()+"} was not provided. Scenario will be ignored.");
+                continue;
+            }
+            if(scenario.getScenarioDelay() < 0 || scenario.getScenarioDuration() < 0){
+                log.warn("Delay or duration for scenario {"+scenario.getScenarioName()+"} was negative. Scenario will be ignored.");
+                continue;
+            }
+            if(scenario.getScenarioFieldValueInfoList() ==  null || scenario.getScenarioFieldValueInfoList().isEmpty()){
+                log.warn("ScenarioFieldValueInfoList for scenario {"+scenario.getScenarioName()+"} is empty or not provided. Scenario will be ignored.");
+                continue;
+            }
+                List<ScenarioFieldValueInfo> validScenarioFieldValueInfoList = getValidScenarioFieldValueInfoForMockSensorPrototype(scenario.getScenarioName(), scenario.getScenarioFieldValueInfoList(), mockSensorPrototype.getMessagePrototype().getFieldsPrototypes());
+                scenario.setScenarioFieldValueInfoList(validScenarioFieldValueInfoList);
+            try{
+                String sensorId = validateAndProcessScenarioSensorId(scenario, mockSensorPrototype.getSensorPrototypeName(), mockSensorPrototype.getSensorsQuantity());
+                scenario.setSensorId(sensorId);
+                validScenarios.add(scenario);
+            }catch (ValidationException validationException){
+                log.warn(validationException.getMessage());
+                continue;
+            }
+        }
+        return validScenarios;
+    }
+
+
+    public List<ScenarioFieldValueInfo> getValidScenarioFieldValueInfoForMockSensorPrototype(String scenarioName, List<ScenarioFieldValueInfo> scenarioFieldValueInfoList, List<FieldPrototype> sensorPrototypeFieldPrototypes){
+        List<ScenarioFieldValueInfo> validScenarioFieldValueInfoList = new ArrayList<>();
+        HashSet<String> fieldNameSet = new HashSet<>();
+        sensorPrototypeFieldPrototypes.stream().
+                forEach(field -> fieldNameSet.add(field.getName()));
+
+        for(ScenarioFieldValueInfo scenarioFieldValueInfo: scenarioFieldValueInfoList){
+            if(fieldNameSet.contains(scenarioFieldValueInfo.getSensorFieldScenarioName())){
+                try{
+                    GenerationRateWrapper generationRateWrapper = GenerationRatesUtils.processGenerationRate(scenarioFieldValueInfo.getSensorFieldScenarioGenerationRate());
+                    scenarioFieldValueInfo.setSensorFieldScenarioGenerationRate(generationRateWrapper.getGenerationRate());
+                    scenarioFieldValueInfo.setSensorFieldScenarioGenerationRateEnum(generationRateWrapper.getGenerationRateEnum());
+                }catch (Exception exception){
+                    log.error("Could not process generationRate for field {"+scenarioFieldValueInfo.getSensorFieldScenarioName()+"} and scenario {"+scenarioName+"} due to "+exception.getMessage()+".Scenario field will be ignored.");
+                }
+                validScenarioFieldValueInfoList.add(scenarioFieldValueInfo);
+            }
+            else{
+                log.error("Could not find scenario field {"+scenarioFieldValueInfo.getSensorFieldScenarioName()+"} for scenario {"+scenarioName+"} for the sensorPrototype .Scenario field will be ignored.");
+            }
+        }
+
+        return validScenarioFieldValueInfoList;
+    }
+
+    public String validateAndProcessScenarioSensorId(Scenario scenario, String mockSensorPrototypeName, int mockSensorPrototypeQuantity) throws ValidationException {
+        if(scenario.getSensorId() ==  null){
+            throw new ValidationException("SensorId for scenario {"+scenario.getScenarioName()+"} was not provided. Scenario will be ignored.");
+        }
+        Integer sensorId = null;
+        try {
+            sensorId = Integer.parseInt(scenario.getSensorId());
+        }catch (Exception e){
+            throw new ValidationException("SensorId for scenario {"+scenario.getScenarioName()+"} was not numeric. Scenario will be ignored.");
+        }
+        if(sensorId > mockSensorPrototypeQuantity){
+            throw new ValidationException("SensorId {"+sensorId+"} for scenario {"+scenario.getScenarioName()+"} is out of range of the mock Sensors Quantity for this mockSensorPrototype. Scenario will be ignored.");
+        }
+        return mockSensorPrototypeName + "_" + sensorId;
+    }
 
 
     @Override
@@ -143,24 +217,28 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
             createMockSensors(exchange);
             Integer delay = (Integer)exchange.getProperty(DELAY);
             if(delay == null)
-                delay=0;
+                delay = 0;
             final int startUpDelay = delay;
             System.out.println(Thread.currentThread().getId()+" "+Thread.currentThread().getName());
-            int threadPoolSize = Integer.parseInt(ApplicationPropertiesUtil.readPropertyFromConfigs(THREAD_POOL_SIZE_PROPERTY));
-            //workloadGenerator.setThreadPoolSize(threadPoolSize);
-            ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(/*threadPoolSize*/mockSensorService.getAllMockSensors().size());
-            ConcurrentHashMap<String, ScheduledFuture<?>> mockSensorJobFutures = new ConcurrentHashMap<>();
-            //  boolean writeToFile = false;
-            //if(workloadGenerator.isInitialized())
-            //  writeToFile = workloadGenerator.isWriteToOutputFile();
+//            Integer threadPoolSize = null;
+//            try{
+//                threadPoolSize =  Integer.parseInt(ApplicationPropertiesUtil.readPropertyFromConfigs(THREAD_POOL_SIZE_PROPERTY));
+//            }
+//            catch (Exception e){
+//                log.info("Thread pool size prioperty not provided. Default thread pool size is the number of sensors.");
+//            }
+//            if(threadPoolSize == null)
+//                threadPoolSize = mockSensorService.getAllMockSensors().size();
+            //ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(threadPoolSize);
+            //ConcurrentHashMap<String, ScheduledFuture<?>> mockSensorJobFutures = new ConcurrentHashMap<>();
+            List<Scenario> scenarioList = mockSensorPrototypes.stream()
+                    .filter(mockSensorPrototype -> mockSensorPrototype.getScenarios() !=  null && !mockSensorPrototype.getScenarios().isEmpty())
+                    .map(mockSensorPrototype -> processValidScenarios(mockSensorPrototype))
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
 
-            //workloadGenerator.setWriteToOutputFile(writeToFile);
-
-            //  Boolean finalWriteToOutputFile = workloadGenerator.isWriteToOutputFile();
-            // Boolean finalInitialized = workloadGenerator.isInitialized();
-            //  if(!workloadGenerator.isInitialized()) {
-           log.info("Creating {"+mockSensorService.getAllMockSensors().size() +"} mock Sensors....");
-           List<MockSensorJob> mockSensorJobs = new ArrayList<>();
+            log.info("Creating {" + mockSensorService.getAllMockSensors().size() + "} mock Sensors....");
+            CopyOnWriteArrayList<MockSensorJob> mockSensorJobs = new CopyOnWriteArrayList<>();
             mockSensorService.getAllMockSensors().parallelStream()
                     .map(mockSensor -> new MockSensorJob(mockSensor))
                     .forEach(mockSensorJob -> {
@@ -172,31 +250,19 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
                             mockSensorJob.setWriteTofFile(false);
                         mockSensorJob.setSensorMessageSendService(sensorMessageSendService);
                         mockSensorJobs.add(mockSensorJob);
-                        mockSensorJobFutures.put(mockSensorJob.getMockSensor().getId(), scheduledExecutorService.scheduleAtFixedRate(mockSensorJob,
-                                startUpDelay, 1,
-                                TimeUnit.SECONDS));
                     });
+            mockSensorJobs.stream().
+                    forEach(mockSensorJob -> mockSensorJob.start());
+            if(!scenarioList.isEmpty()){
+                scenarioManager = new ScenarioManager(scenarioList, mockSensorJobs);
+            }
             workloadGenerator.setMockSensorJobs(mockSensorJobs);
-//            }else{
-//                workloadGenerator.getMockSensorJobs().parallelStream()
-//                        .forEach(mockSensorJob -> {
-//                            if (!finalInitialized && finalWriteToOutputFile) {
-//                                mockSensorJob.setWriterThread(workloadGenerator.getWriterThread());
-//                                mockSensorJob.setWriteTofFile(finalWriteToOutputFile);
-//                            }
-//                            mockSensorJobFutures.put(mockSensorJob.getMockSensor().getId(), scheduledExecutorService.scheduleAtFixedRate(mockSensorJob,
-//                                    startUpDelay, 1,
-//                                    TimeUnit.SECONDS));
-//                        });
-//            }
-            workloadGenerator.setMockSensorJobFutures(mockSensorJobFutures);
-            workloadGenerator.setScheduledExecutorService(scheduledExecutorService);
             startedProducing = true;
 //            if(!workloadGenerator.isInitialized())
 //                workloadGenerator.setInitialized(true);
         }catch (Exception exception){
             if(exception instanceof IOException){
-                errorMessage = "Could not create file for ouptut";
+                errorMessage = "Could not create file for output";
             }else
                 errorMessage = exception.getMessage();
 //            exchange.setHttpStatus(HTTP_INTERNAL_SERVER_ERROR);
@@ -208,22 +274,14 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 
     @Override
     public void pause(Exchange exchange) throws Exception {
+        if(scenarioManager != null)
+            scenarioManager.cancelScenarioJobs();
         cancelAllMockSensorJobs();
-        workloadGenerator.setMockSensorJobFutures(null);
-        workloadGenerator.getScheduledExecutorService().shutdown();
         if (workloadGenerator.isWriteToOutputFile()) {
             while (workloadGenerator.getWriterThread().getBlockingDeque().size() != 0) ;
             workloadGenerator.getWriterThread().pause();
         }
-        if (workloadGenerator.getScheduledExecutorService().isShutdown()) {
-            startedProducing = false;
-            workloadGenerator.setScheduledExecutorService(null);
-
-        } else {
-            log.error("ScheduledExecuterService could not be shutdown");
-            throw  new Exception("ScheduledExecuterService could not be shutdown");
-
-        }
+        startedProducing = false;
 
         workloadGenerator.getMockSensorPrototypes().stream()
                 .filter(mockSensorPrototype -> mockSensorPrototype.getEvaluateFieldGenerationRate())
@@ -245,13 +303,9 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
     @Override
     public void resume(Exchange exchange) throws Exception {
 
-        if(!workloadGenerator.isStarted()/*&&workloadGenerator.isInitialized()*/&&workloadGenerator.isWriteToOutputFile()){
+        if(!workloadGenerator.isStarted()/*&&workloadGenerator.isInitialized()*/&&workloadGenerator.isWriteToOutputFile()) {
             workloadGenerator.getWriterThread().resume2();
         }
-      //  int threadPoolSize = Integer.parseInt(Utils.readPropertyFromConfigs(THREAD_POOL_SIZE_PROPERTY));
-       // workloadGenerator.setThreadPoolSize(threadPoolSize);
-        ScheduledExecutorService scheduledExecutorService= Executors.newScheduledThreadPool(mockSensorService.getAllMockSensors().size());
-        ConcurrentHashMap<String, ScheduledFuture<?>> mockSensorJobFutures = new ConcurrentHashMap<>();
 
         workloadGenerator.getMockSensorJobs().parallelStream()
                 .forEach(mockSensorJob -> {
@@ -259,12 +313,18 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 //                        mockSensorJob.setWriterThread(workloadGenerator.getWriterThread());
 //                        mockSensorJob.setWriteTofFile(finalWriteToOutputFile);
 //                    }
-                    mockSensorJobFutures.put(mockSensorJob.getMockSensor().getId(), scheduledExecutorService.scheduleAtFixedRate(mockSensorJob,
-                            0, 1,
-                            TimeUnit.SECONDS));
+                    try {
+                        mockSensorJob.resume2();
+                    } catch (Exception e) {
+                        log.error("SensorJob {"+mockSensorJob.getMockSensor().getId()+ "} could not be resumed due to:"+e.getMessage(), e);
+                    }
                 });
-        workloadGenerator.setMockSensorJobFutures(mockSensorJobFutures);
-        workloadGenerator.setScheduledExecutorService(scheduledExecutorService);
+        workloadGenerator.getMockSensorJobs().stream()
+                .forEach(mockSensorJob -> {
+                    try{
+                        mockSensorJob.resume2();
+                    }catch (Exception exception){}
+                });
         startedProducing = true;
     }
 
@@ -274,6 +334,14 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
         //  workloadGenerator.setInitialized(false);
         clearMockSensorRepository();
         clearMockSensorPrototypeRepository();
+        workloadGenerator.getMockSensorJobs()
+                .stream().forEach(mockSensorJob -> {
+            try {
+                mockSensorJob.terminate();
+            } catch (Exception e) {
+                log.error("SensorJob {"+mockSensorJob.getMockSensor().getId()+"} could not be terminated successfully");
+            }
+        });
 
     }
 
@@ -290,33 +358,30 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 
 
     public synchronized void cancelAllMockSensorJobs()throws  Exception {
-        for (ScheduledFuture<?> scheduledFuture : workloadGenerator.getMockSensorJobFutures().values()) {
-            scheduledFuture.cancel(true);
-        }
-        for (Iterator<ConcurrentHashMap.Entry<String, ScheduledFuture<?>>> it = workloadGenerator.getMockSensorJobFutures().entrySet().iterator(); it.hasNext(); ) {
-            it.next();
-            it.remove();
-        }
+
+        this.workloadGenerator.getMockSensorJobs().stream().
+                forEach(mockSensorJob -> {try {
+                    mockSensorJob.pause();
+                }catch (Exception runtimeException){}
+                });
+
     }
 
     public synchronized void createMockSensorJobsForMockSensorPrototype(Exchange exchange,String  mockSensorPrototypeName,int quantity){
-        boolean found=false;
+        boolean found = false;
         for(MockSensorPrototypeJob mockSensorPrototypeJob :workloadGenerator.getMockSensorPrototypeJobs()){
             if(mockSensorPrototypeJob.getMockSensorPrototypeName().equals(mockSensorPrototypeName)){
-                found=true;
+                found = true;
                 for (int i = 0; i < quantity; ++i) {
-                    MockSensor newMockSensor =new MockSensor(mockSensorPrototypeJob.getMockSensorPrototype(), mockSensorPrototypeJob.getCounter().get());
-                    MockSensorJob newMockSensorJob =new MockSensorJob(newMockSensor);
+                    MockSensor newMockSensor = new MockSensor(mockSensorPrototypeJob.getMockSensorPrototype(), mockSensorPrototypeJob.getCounter().get());
+                    MockSensorJob newMockSensorJob = new MockSensorJob(newMockSensor);
                     if (workloadGenerator.isWriteToOutputFile()) {
                         newMockSensorJob.setWriterThread(workloadGenerator.getWriterThread());
                         newMockSensorJob.setWriteTofFile(workloadGenerator.isWriteToOutputFile());
                     }
                     newMockSensorJob.setSensorMessageSendService(sensorMessageSendService);
                     workloadGenerator.getMockSensorJobs().add(newMockSensorJob);
-                    workloadGenerator.getMockSensorJobFutures().put(newMockSensorJob.getMockSensor().getId(),
-                            workloadGenerator.getScheduledExecutorService().scheduleAtFixedRate(newMockSensorJob,
-                                    0, 2,
-                                    TimeUnit.SECONDS));
+                    newMockSensorJob.start();
                     mockSensorPrototypeJob.getCounter().getAndIncrement();
                     mockSensorPrototypeJob.getSensorsNumber().getAndIncrement();
                     mockSensorPrototypeService.editMockSensorsNumberForMockSensorPrototype(mockSensorPrototypeJob.getSensorsNumber().get(),mockSensorPrototypeName);
@@ -326,7 +391,7 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
             }
         }
         if(!found){
-            exchange.setProperty(ERROR_MESSAGE,"mockSensorPrototypeName with name: "+mockSensorPrototypeName+ "not found");
+            exchange.setProperty(ERROR_MESSAGE, "mockSensorPrototypeName with name: "+mockSensorPrototypeName+ "not found");
             exchange.setProperty(ERROR_MESSAGE_TYPE,VALIDATION_ERROR);
             exchange.setHttpStatus(HTTP_NOT_FOUND);
         }
@@ -335,8 +400,8 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
     }
 
 
-    public synchronized void createMockSensorJobsForNewSensorPrototype(Exchange exchange,MockSensorPrototype mockSensorPrototype){
-        MockSensorPrototype mockSensorPrototype1= mockSensorPrototypeService.retrieveMockSensorPrototypeByName(mockSensorPrototype.getSensorPrototypeName());
+    public synchronized void createMockSensorJobsForNewSensorPrototype(Exchange exchange, MockSensorPrototype mockSensorPrototype){
+        MockSensorPrototype mockSensorPrototype1 = mockSensorPrototypeService.retrieveMockSensorPrototypeByName(mockSensorPrototype.getSensorPrototypeName());
 
         if (mockSensorPrototype1!=null) {//EXIST ALREADY
             exchange.setProperty(ERROR_MESSAGE, "MockSensorPrototype with name: " + mockSensorPrototype.getSensorPrototypeName() + " already exists!");
@@ -358,10 +423,7 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
                                         mockSensorJob.setWriteTofFile(workloadGenerator.isWriteToOutputFile());
                                     }
                                     mockSensorJob.setSensorMessageSendService(sensorMessageSendService);
-                                    workloadGenerator.getMockSensorJobFutures().put(mockSensorJob.getMockSensor().getId(),
-                                            workloadGenerator.getScheduledExecutorService().scheduleAtFixedRate(mockSensorJob,
-                                                    0, 2,
-                                                    TimeUnit.SECONDS));
+                                    mockSensorJob.start();
                                     workloadGenerator.getMockSensorJobs().add(mockSensorJob);
                                 }
                         );
@@ -378,26 +440,27 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 
 
 
-    public synchronized void removeMockSensorJob(Exchange exchange,String mockSensorId){
-        boolean found=false;
-        for(int i = 0; i<workloadGenerator.getMockSensorJobs().size(); ++i){
+    public synchronized void terminateMockSensorJob(Exchange exchange,String mockSensorId){
+        boolean found = false;
+        for(int i = 0; i < workloadGenerator.getMockSensorJobs().size(); ++i){
             MockSensorJob mockSensorJob =workloadGenerator.getMockSensorJobs().get(i);
             if (mockSensorJob.getMockSensor().getId().equals(mockSensorId)) {
                 found = true;
-                ScheduledFuture<?> sensorFuture = workloadGenerator.getMockSensorJobFutures().get(mockSensorJob.getMockSensor().getId());
-                boolean isCanceled = sensorFuture.cancel(true);
-                if (isCanceled && sensorFuture.isCancelled()) {
-                    workloadGenerator.getMockSensorJobFutures().remove(mockSensorJob.getMockSensor().getId());
-                    for (int j = 0; j < workloadGenerator.getMockSensorPrototypeJobs().size(); ++j) {
-                        if (workloadGenerator.getMockSensorPrototypeJobs().get(j).getMockSensorPrototypeName().equals(mockSensorJob.getMockSensor().getMockSensorPrototype().getSensorPrototypeName())) {
-                            MockSensorPrototypeJob mockSensorPrototypeJob = workloadGenerator.getMockSensorPrototypeJobs().get(j);
-                            mockSensorPrototypeJob.getSensorsNumber().getAndDecrement();
-                            mockSensorPrototypeService.editMockSensorsNumberForMockSensorPrototype(mockSensorPrototypeJob.getSensorsNumber().get(), mockSensorPrototypeJob.getMockSensorPrototypeName());
-                            break;
-                        }
+                try {
+                    mockSensorJob.terminate();
+                } catch (Exception e) {
+                    log.error("SensorJob could not be terminated: "+e.getMessage());
+                }
+                for (int j = 0; j < workloadGenerator.getMockSensorPrototypeJobs().size(); ++j) {
+                    if (workloadGenerator.getMockSensorPrototypeJobs().get(j).getMockSensorPrototypeName().equals(mockSensorJob.getMockSensor().getMockSensorPrototype().getSensorPrototypeName())) {
+                        MockSensorPrototypeJob mockSensorPrototypeJob = workloadGenerator.getMockSensorPrototypeJobs().get(j);
+                        mockSensorPrototypeJob.getSensorsNumber().getAndDecrement();
+                        mockSensorPrototypeService.editMockSensorsNumberForMockSensorPrototype(mockSensorPrototypeJob.getSensorsNumber().get(), mockSensorPrototypeJob.getMockSensorPrototypeName());
+                        break;
                     }
-                    workloadGenerator.getMockSensorJobs().remove(i);
-                    break;}
+                }
+                workloadGenerator.getMockSensorJobs().remove(i);
+                break;
             }
             mockSensorService.deleteMockSensor(mockSensorId);
         }
@@ -412,17 +475,17 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
     }
 
 
-    public synchronized void removeMockSensorJobsForMockSensorPrototype(Exchange exchange,String mockSensorPrototypeName){
-        boolean found=false;
-        for(int i=0;i<workloadGenerator.getMockSensorPrototypeJobs().size();++i) {
+    public synchronized void terminateMockSensorJobsForMockSensorPrototype(Exchange exchange, String mockSensorPrototypeName){
+        boolean found = false;
+        for(int i = 0; i < workloadGenerator.getMockSensorPrototypeJobs().size(); ++i) {
             if(workloadGenerator.getMockSensorPrototypeJobs().get(i).getMockSensorPrototypeName().equals(mockSensorPrototypeName)){
-                found=true;
+                found = true;
                 workloadGenerator.getMockSensorPrototypeJobs().remove(i);
                 break;}
         }
         if(!found){
             //NOT FOUND
-            exchange.setProperty(ERROR_MESSAGE,"MockSensorPrototype with name: "+mockSensorPrototypeName+ " not found");
+            exchange.setProperty(ERROR_MESSAGE,"MockSensorPrototype with name: " + mockSensorPrototypeName + " not found");
             exchange.setProperty(ERROR_MESSAGE_TYPE,VALIDATION_ERROR);
             exchange.setHttpStatus(HTTP_NOT_FOUND);
             return;
@@ -433,12 +496,12 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
         while (mockSensorJobListIterator.hasNext()) {
             MockSensorJob mockSensorJob = mockSensorJobListIterator.next();
             if(mockSensorJob.getMockSensor().getMockSensorPrototype().getSensorPrototypeName().equals(mockSensorPrototypeName)){
-                ScheduledFuture<?> sensorFuture=  workloadGenerator.getMockSensorJobFutures().get(mockSensorJob.getMockSensor().getId());
-                boolean isCanceled=sensorFuture.cancel(true);
-                if(isCanceled&&sensorFuture.isCancelled()){
-                    workloadGenerator.getMockSensorJobFutures().remove(mockSensorJob.getMockSensor().getId());
-                    mockSensorJobListIterator.remove();
+                try {
+                    mockSensorJob.terminate();
+                } catch (Exception exception) {
+                    log.error("SensorJob {"+mockSensorJob.getMockSensor().getId()+"} could not be terminated succesfully due to:"+exception.getMessage(), exception);
                 }
+                mockSensorJobListIterator.remove();
             }
         }
         exchange.setHttpStatus(HTTP_NO_CONTENT);
@@ -453,27 +516,5 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
     public synchronized void clearMockSensorPrototypeRepository(){
         mockSensorPrototypeService.deleteAll();
     }
-
-//    public void stop(Exchange exchange) throws Exception{
-//        cancelAllMockSensorJobs();
-//        workloadGenerator.setMockSensorJobFutures(null);
-//        workloadGenerator.getScheduledExecutorService().shutdown();
-//        if (workloadGenerator.isWriteToOutputFile()) {
-//            while (workloadGenerator.getWriterThread().getBlockingDeque().size() != 0) ;
-//            workloadGenerator.getWriterThread().pause();
-//        }
-//        if (workloadGenerator.getScheduledExecutorService().isShutdown()) {
-//            startedProducing = false;
-//            workloadGenerator.setScheduledExecutorService(null);
-//            SuccessResponseMessage successResponseMessage = new SuccessResponseMessage("Workload Generator has been successfully stopped!");
-//            exchange.setBody(successResponseMessage);
-//            log.info("Generator Stopped");
-//        } else {
-//            exchange.setProperty(ERROR_MESSAGE_TYPE, UNEXPECTED_ERROR_OCCURRED);
-//            exchange.setProperty(ERROR_MESSAGE, "Workload Generator could not be stopped");
-//            exchange.setHttpStatus(HTTP_INTERNAL_SERVER_ERROR);
-//        }
-//
-//    }
 
 }

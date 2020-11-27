@@ -10,7 +10,7 @@ public class FieldPrototype<T> {
 
     private T value;
 
-    private  String type;
+    private String type;
 
     private TypesEnum typeEnum;
 
@@ -30,6 +30,14 @@ public class FieldPrototype<T> {
         this.unit = unit;
     }
 
+    public FieldPrototype copyFieldPrototype(){
+        FieldPrototype copy = new FieldPrototype();
+        copy.setName(name);
+        copy.setType(type);
+        copy.setTypeEnum(typeEnum);
+        copy.setUnit(unit);
+        return copy;
+    }
     public TypesEnum getTypeEnum() {
         return typeEnum;
     }

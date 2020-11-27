@@ -1,7 +1,7 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model;
 
 
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensorJob;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.MockSensorJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensorPrototypeJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSensorPrototype;
@@ -16,7 +16,6 @@ import java.util.concurrent.ScheduledFuture;
 
 @Component
 public class WorkloadGenerator {
-    protected ScheduledExecutorService scheduledExecutorService;
 
     protected int threadPoolSize;
 
@@ -54,11 +53,6 @@ public class WorkloadGenerator {
         this.datasetSensorPrototypes = datasetSensorPrototypes;
     }
 
-    protected ConcurrentHashMap<String,ScheduledFuture<?>> mockSensorJobFutures;
-
-    public ScheduledExecutorService getScheduledExecutorService() {
-        return scheduledExecutorService;
-    }
 
     public WriterThread getWriterThread() {
         return writerThread;
@@ -68,9 +62,7 @@ public class WorkloadGenerator {
         this.writerThread = writerThread;
     }
 
-    public void setScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
-        this.scheduledExecutorService = scheduledExecutorService;
-    }
+
 
     public int getThreadPoolSize() {
         return threadPoolSize;
@@ -110,14 +102,6 @@ public class WorkloadGenerator {
 
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
-    }
-
-    public ConcurrentHashMap<String, ScheduledFuture<?>> getMockSensorJobFutures() {
-        return mockSensorJobFutures;
-    }
-
-    public void setMockSensorJobFutures(ConcurrentHashMap<String, ScheduledFuture<?>> mockSensorJobFutures) {
-        this.mockSensorJobFutures = mockSensorJobFutures;
     }
 
     public List<MockSensorJob> getMockSensorJobs() {

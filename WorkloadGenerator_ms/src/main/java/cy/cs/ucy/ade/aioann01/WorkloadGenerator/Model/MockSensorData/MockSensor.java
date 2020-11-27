@@ -14,8 +14,8 @@ public class MockSensor {
     public MockSensor(){}
 
     public MockSensor(MockSensorPrototype mockSensorPrototype, int counter){
-        this.mockSensorPrototype=mockSensorPrototype;
-        this.id=mockSensorPrototype.getSensorPrototypeName()+"_"+counter;
+        this.mockSensorPrototype = mockSensorPrototype;
+        this.id = mockSensorPrototype.getSensorPrototypeName()+"_"+counter;
     }
 
     public String getId() {

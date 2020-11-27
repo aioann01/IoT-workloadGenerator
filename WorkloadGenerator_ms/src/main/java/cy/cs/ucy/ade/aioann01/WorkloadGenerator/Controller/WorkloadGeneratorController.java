@@ -140,18 +140,18 @@ public class WorkloadGeneratorController {
 
 
 
-    @GetMapping("workloadGeneratorHelper/mockSensors")
-    public Exchange retrieveMockSensors(Exchange exchange,@RequestParam(required = false) String id){
-        log.info("Request to {GET workloadGeneratorHelper/MockSensors} received");
+    @GetMapping("mockSensors")
+    public Exchange retrieveMockSensors(Exchange exchange, @RequestParam(required = false) String sensorId){
+        log.info("Request to {GET MockSensors} received");
         if (!workloadGeneratorService.isStarted()) {
-            Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working",UNEXPECTED_ERROR_OCCURRED);
+            Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working", UNEXPECTED_ERROR_OCCURRED);
             return exchange;
         }
-        for(ISensorDataProducerService sensorDataProducerService:workloadGeneratorService.getSensorDataProducerServices())
+        for(ISensorDataProducerService sensorDataProducerService : workloadGeneratorService.getSensorDataProducerServices())
             if(sensorDataProducerService instanceof ProduceMockSensorDataService) {
-                if (id != null) {
-                    log.debug("id query param is present:" + id);
-                    mockSensorService.findMockSensorById(exchange, id);
+                if (sensorId != null) {
+                    log.debug("id query param is present:" + sensorId);
+                    mockSensorService.findMockSensorById(exchange, sensorId);
                 } else {
                     mockSensorService.retrieveAllMockSensors(exchange);
                 }
@@ -162,9 +162,9 @@ public class WorkloadGeneratorController {
     }
 
 
-    @PostMapping("workloadGeneratorHelper/mockSensors")
-    public Exchange addMockSensor(Exchange exchange,@RequestBody(required = true) AddMockSensorsRequest addMockSensorsRequest) {
-        log.info("Request to {POST workloadGeneratorHelper/mockSensors} received");
+    @PostMapping("mockSensors")
+    public Exchange addMockSensor(Exchange exchange, @RequestBody(required = true) AddMockSensorsRequest addMockSensorsRequest) {
+        log.info("Request to {POST mockSensors} received");
         if (!workloadGeneratorService.isStarted()) {
             Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working",UNEXPECTED_ERROR_OCCURRED);
             return exchange;
@@ -184,16 +184,16 @@ public class WorkloadGeneratorController {
     }
 
 
-    @DeleteMapping("workloadGeneratorHelper/mockSensors/{mockSensorId}")
+    @DeleteMapping("mockSensors/{mockSensorId}")
     public Exchange deleteMockSensor(Exchange exchange,@PathVariable(name = "mockSensorId", required = true) String mockSensorId) {
-        log.info("Request to {DELETE workloadGeneratorHelper/mockSensors} received");
+        log.info("Request to {DELETE mockSensors} received");
         if (!workloadGeneratorService.isStarted()) {
             Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working",UNEXPECTED_ERROR_OCCURRED);
             return exchange;
         }
         for(ISensorDataProducerService sensorDataProducerService:workloadGeneratorService.getSensorDataProducerServices())
             if(sensorDataProducerService instanceof ProduceMockSensorDataService) {
-                ((ProduceMockSensorDataService) sensorDataProducerService).removeMockSensorJob(exchange,mockSensorId);
+                ((ProduceMockSensorDataService) sensorDataProducerService).terminateMockSensorJob(exchange, mockSensorId);
             }else {
                 Utils.setValidationExceptionOnExchange(exchange,"MockSensor Operations are not supported for the provided configs_file.",UNEXPECTED_ERROR_OCCURRED);
             }
@@ -201,9 +201,9 @@ public class WorkloadGeneratorController {
     }
 
 
-    @GetMapping("workloadGeneratorHelper/mockSensorPrototypes")
+    @GetMapping("mockSensorPrototypes")
     public Exchange retrieveMockSensorPrototypes(Exchange exchange,@RequestParam(required = false)  String name){
-        log.info("Request to {GET workloadGeneratorHelper/mockSensorPrototypes} received");
+        log.info("Request to {GET mockSensorPrototypes} received");
         if(!workloadGeneratorService.isStarted()){
             Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working",UNEXPECTED_ERROR_OCCURRED);
             return exchange;}
@@ -225,9 +225,9 @@ public class WorkloadGeneratorController {
 
 
 
-    @PostMapping("workloadGeneratorHelper/mockSensorPrototypes")
+    @PostMapping("mockSensorPrototypes")
     public Exchange addSensorPrototype(Exchange exchange,@RequestBody(required = true) MockSensorPrototype mockSensorPrototype) {
-        log.info("Request to {POST workloadGeneratorHelper/sensorPrototypes} received");
+        log.info("Request to {POST sensorPrototypes} received");
 
         if (!workloadGeneratorService.isStarted()) {
             Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working",UNEXPECTED_ERROR_OCCURRED);
@@ -249,9 +249,9 @@ public class WorkloadGeneratorController {
 
 
 
-    @DeleteMapping("workloadGeneratorHelper/mockSensorPrototypes/{mockSensorPrototypeName}")
+    @DeleteMapping("mockSensorPrototypes/{mockSensorPrototypeName}")
     public Exchange deleteMockSensorPrototype(Exchange exchange,@PathVariable(name = "mockSensorPrototypeName", required = true) String mockSensorPrototypeName) {
-        log.info("Request to {DELETE workloadGeneratorHelper/mockSensorPrototypes} received");
+        log.info("Request to {DELETE mockSensorPrototypes} received");
 
         if (!workloadGeneratorService.isStarted()) {
             Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working",UNEXPECTED_ERROR_OCCURRED);
@@ -260,7 +260,7 @@ public class WorkloadGeneratorController {
         for(ISensorDataProducerService sensorDataProducerService:workloadGeneratorService.getSensorDataProducerServices())
             if(sensorDataProducerService instanceof ProduceMockSensorDataService) {
 
-                ((ProduceMockSensorDataService) sensorDataProducerService).removeMockSensorJobsForMockSensorPrototype(exchange,mockSensorPrototypeName);
+                ((ProduceMockSensorDataService) sensorDataProducerService).terminateMockSensorJobsForMockSensorPrototype(exchange, mockSensorPrototypeName);
             }else {
                 Utils.setValidationExceptionOnExchange(exchange,"MockSensor Operations are not supported for the provided configs_file.",UNEXPECTED_ERROR_OCCURRED);
             }

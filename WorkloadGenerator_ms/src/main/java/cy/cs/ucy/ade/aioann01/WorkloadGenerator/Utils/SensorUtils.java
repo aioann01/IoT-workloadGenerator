@@ -7,6 +7,8 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.GenerationRate.*;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldValueInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.SensorPrototype;
@@ -115,33 +117,9 @@ public class SensorUtils<T> {
     }
 
     public static void setSensorPrototypeGenerationRate(SensorPrototype sensorPrototype) throws Exception {
-        String errorMessage = null;
-        try {
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            LinkedHashMap<String, Object> initialFieldPrototypeValue = (LinkedHashMap<String, Object>) sensorPrototype.getGenerationRate();
-
-            if (initialFieldPrototypeValue.containsKey("normalDistribution")) {
-                sensorPrototype.setGenerationRate(objectMapper.convertValue(initialFieldPrototypeValue.get("normalDistribution"), NormalDistributionGenerationRate.class));
-                sensorPrototype.setGenerationRateType(NORMAL_DISTRIBUTION);
-            } else if (initialFieldPrototypeValue.containsKey("distributions")) {
-                sensorPrototype.setGenerationRate(objectMapper.convertValue(sensorPrototype.getGenerationRate(), DistributionGenerationRate.class));
-                sensorPrototype.setGenerationRateType(DISTRIBUTION);
-            } else if (initialFieldPrototypeValue.containsKey("constant")) {
-                sensorPrototype.setGenerationRate(objectMapper.convertValue(initialFieldPrototypeValue.get("constant"), ConstantGenerationRate.class));
-                sensorPrototype.setGenerationRateType(CONSTANT);
-            } else if (initialFieldPrototypeValue.containsKey("random")) {
-                sensorPrototype.setGenerationRate(objectMapper.convertValue(initialFieldPrototypeValue.get("random"), RandomGenerationRate.class));
-                sensorPrototype.setGenerationRateType(RANDOM);
-            } else {
-                errorMessage = "Not supported Sensor generation rate type  for sensorPrototype" /*+ sensorPrototype.getName()*/;
-                log.error(errorMessage);
-            }
-        } catch (Exception exception) {
-            log.error(EXCEPTION_CAUGHT + exception.getMessage(), exception);
-            throw exception;
-        }
-        if (errorMessage != null)
-            throw new Exception(errorMessage);
+        GenerationRateWrapper generationRateWrapper = GenerationRatesUtils.processGenerationRate(sensorPrototype.getGenerationRate());
+        sensorPrototype.setGenerationRate(generationRateWrapper.getGenerationRate());
+        sensorPrototype.setGenerationRateType(generationRateWrapper.getGenerationRateEnum());
     }
 
     public static void setDatasetSensorPrototypeMessageType(DatasetSensorPrototype datasetSensorPrototype) throws Exception {
@@ -233,12 +211,22 @@ public class SensorUtils<T> {
         return formattedMessage;
     }
 
-    public static String createMessage(SensorMessagePrototype messagePrototype, SensorFieldStatistics[] sensorFieldStatistics, Boolean evaluateFieldValue) {
+
+    public static String createMessage(SensorMessagePrototype messagePrototype, SensorFieldStatistics[] sensorFieldStatistics, Boolean evaluateFieldValue, Boolean scenarioMode, Map<String, ScenarioFieldValueInfo> scenarioFieldValueInfoMap) {
         JSONObject message = new JSONObject();
         for (int i = 0; i < messagePrototype.getFieldsPrototypes().size(); ++i) {
             FieldPrototype fieldPrototype = messagePrototype.getFieldsPrototypes().get(i);
             try {
-                Object fieldValue = setFieldValue(fieldPrototype, sensorFieldStatistics[i], evaluateFieldValue);
+                Object fieldValue = null;
+                if(scenarioMode && scenarioFieldValueInfoMap.get(fieldPrototype.getName()) != null){
+                    ScenarioFieldValueInfo scenarioFieldValueInfo = scenarioFieldValueInfoMap.get(fieldPrototype.getName());
+                    FieldPrototype scenarioFieldPrototype = fieldPrototype.copyFieldPrototype();
+                    scenarioFieldPrototype.setValue(scenarioFieldValueInfo.getSensorFieldScenarioGenerationRate());
+                    scenarioFieldPrototype.setGenerationRateEnum(scenarioFieldValueInfo.getSensorFieldScenarioGenerationRateEnum());
+                    fieldValue = setFieldValue(scenarioFieldPrototype, sensorFieldStatistics[i], evaluateFieldValue);
+                }
+                else
+                    fieldValue = setFieldValue(fieldPrototype, sensorFieldStatistics[i], evaluateFieldValue);
                 message.put(fieldPrototype.getName(), fieldValue);
 
             } catch (Exception e) {

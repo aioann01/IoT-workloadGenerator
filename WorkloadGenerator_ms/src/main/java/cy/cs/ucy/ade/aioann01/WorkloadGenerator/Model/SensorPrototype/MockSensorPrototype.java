@@ -1,7 +1,10 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.SensorPrototype;
+
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MockSensorPrototype extends SensorPrototype {
@@ -13,6 +16,16 @@ public class MockSensorPrototype extends SensorPrototype {
     private String outputFile;
 
     private Boolean evaluateFieldGenerationRate;
+
+    private List<Scenario> scenarios;
+
+    public List<Scenario> getScenarios() {
+        return scenarios;
+    }
+
+    public void setScenarios(List<Scenario> scenarios) {
+        this.scenarios = scenarios;
+    }
 
     public Boolean getEvaluateFieldGenerationRate() {
         return evaluateFieldGenerationRate;

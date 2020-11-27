@@ -53,6 +53,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         httpSecurity.csrf().disable()
                 .authorizeRequests()
+                .antMatchers("/mockSensors/**").permitAll()
+                .antMatchers("/mockSensorPrototypes/**").permitAll()
                 .antMatchers("/workloadGenerator/**").permitAll()
                 .antMatchers("/workloadGeneratorHelper/**").permitAll()
                 .anyRequest().authenticated()

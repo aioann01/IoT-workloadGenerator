@@ -5,42 +5,75 @@
 "requestURI":"/testing",
 
 	"httpServers": [{
-			"serverIp": "http-server",
+			"serverIp": "localhost",
 			"serverPort": "8095"
 }]
-},	
-"sensorDataConfigs": {
-			"sensorPrototypes": [
+},
 
-
-{"mockSensorPrototype": {
-						"evaluateFieldGenerationRate": true,
-						"sensorPrototypeName": "humidity_sensor",
-						"sensorsQuantity": 2000,
+		"sensorDataConfigs": {
+			"sensorPrototypes": [{
+					"datasetSensorPrototype": {
+						"sensorPrototypeName": "temperature",
+						"messageExportType": "json",
+						"timestampedDataset": "false",
+						"sortedDataset": "true",
+						"datasetFile": "temperature_sensor.csv",
+						"sensorIdColumnName": "SensorId",
 						"generationRate": {
 							"constant": {
-								"value": 4
+								"value": 3
+							}
+						}
+
+					}
+				},
+				{
+					"mockSensorPrototype": {
+						"sensorPrototypeName": "motion_detection_sensor",
+						"description": "Sensor that detects  movement and return true if motion or false if no motion",
+						"sensorsQuantity": 10,
+						"generationRate": {
+							"constant": {
+								"value": 3
 							}
 						},
 						"messagePrototype": {
-							"type": "xml",
+							"type": "json",
 							"fieldsPrototypes": [{
-								"name": "humidity",
-								"type": "double",
+								"name": "movement",
+								"type": "boolean",
 								"value": {
-									"normalDistribution": {
-										"mean": 20.0,
-										"deviation": 5.0
-									}
-								},
-								"unit": "%"
+									"distributions": [{
+											"value": true,
+											"probability": 0.1
+										},
+										{
+											"value": false,
+											"probability": 0.9
+										}
+									]
+								}
 							}]
-						}
+						},
+						"scenarios": [{
+							"sensorId": "5",
+							"scenarioName": "thief",
+							"scenarioDelay": "10",
+							"scenarioDuration": "10",
+							"scenarioFieldValueInfoList": [{
+								"sensorFieldScenarioName": "movement",
+								"sensorFieldScenarioGenerationRate": {
+									"value": {
+										"constant": {
+											"value": true
+										}
+									}
+								}
+							}]
+						}]
 					}
 				}
 			]
 		}
-
-
 	}
 }

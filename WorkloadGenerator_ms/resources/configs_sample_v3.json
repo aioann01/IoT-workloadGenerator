@@ -113,6 +113,23 @@
 					"description": "string",
 					"sensorPrototypeName": "string",
 					"sensorsQuantity": "number",
+					"scenarios": [{
+							"sensorId": "integer",
+							"scenarioName": "string",
+							"scenarioDelay": "integer",
+							"scenarioDuration": "integer",
+							"scenarioFieldValueInfoList": [{
+								"sensorFieldScenarioName": "string",
+								"sensorFieldScenarioGenerationRate": {
+									"value": {
+										"normalDistribution": {
+											"mean": 40.0,
+											"deviation": 5.0
+										}
+									}
+								}
+							}]
+						}],
 					"generation_rate": {
 						"constant": "number",
 						"random": {

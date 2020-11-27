@@ -290,7 +290,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
 
         if(workloadGenerator.getConfigs().has(SENSOR_DATA_CONFIGS)) {
             JSONObject sensorDataConfigs = workloadGenerator.getConfigs().getJSONObject(SENSOR_DATA_CONFIGS);
-            if(sensorDataConfigs.has(SENSOR_PROTOTYPES)) {
+            if(sensorDataConfigs.has(SENSOR_PROTOTYPES)){
                 JSONArray sensorPrototypesJSONArray = sensorDataConfigs.getJSONArray(SENSOR_PROTOTYPES);
                 List<MockSensorPrototype> mockSensorPrototypes = new ArrayList<>();
                 List<DatasetSensorPrototype> datasetSensorPrototypes = new ArrayList<>();

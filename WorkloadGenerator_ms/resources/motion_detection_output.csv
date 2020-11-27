@@ -1,0 +1,22 @@
+Timestamp,SensorId,movement
+27/11/2020 13:12:16,motion_detection_sensor_1,FALSE
+27/11/2020 13:12:16,motion_detection_sensor_2,FALSE
+27/11/2020 13:12:16,motion_detection_sensor_0,FALSE
+27/11/2020 13:12:21,motion_detection_sensor_0,FALSE
+27/11/2020 13:12:21,motion_detection_sensor_2,FALSE
+27/11/2020 13:12:21,motion_detection_sensor_1,TRUE
+27/11/2020 13:12:26,motion_detection_sensor_1,TRUE
+27/11/2020 13:12:26,motion_detection_sensor_0,FALSE
+27/11/2020 13:12:26,motion_detection_sensor_2,FALSE
+27/11/2020 13:12:31,motion_detection_sensor_1,FALSE
+27/11/2020 13:12:31,motion_detection_sensor_0,FALSE
+27/11/2020 13:12:31,motion_detection_sensor_2,FALSE
+27/11/2020 13:12:36,motion_detection_sensor_1,FALSE
+27/11/2020 13:12:36,motion_detection_sensor_2,FALSE
+27/11/2020 13:12:36,motion_detection_sensor_0,FALSE
+27/11/2020 13:12:41,motion_detection_sensor_1,TRUE
+27/11/2020 13:12:41,motion_detection_sensor_0,TRUE
+27/11/2020 13:12:41,motion_detection_sensor_2,TRUE
+27/11/2020 13:12:46,motion_detection_sensor_1,FALSE
+27/11/2020 13:12:46,motion_detection_sensor_0,FALSE
+27/11/2020 13:12:46,motion_detection_sensor_2,FALSE
