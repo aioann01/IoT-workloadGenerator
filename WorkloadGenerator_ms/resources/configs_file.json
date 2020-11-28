@@ -1,40 +1,28 @@
 {
 	"configs": {
 		"protocol": "HTTP",
-	"httpConfigs":{
+	"protocolConfigs":{
 "requestURI":"/testing",
 
 	"httpServers": [{
-			"serverIp": "localhost",
+			"serverIp": "http-server",
 			"serverPort": "8095"
 }]
 },
 
 		"sensorDataConfigs": {
 			"sensorPrototypes": [{
-					"datasetSensorPrototype": {
-						"sensorPrototypeName": "temperature",
-						"messageExportType": "json",
-						"timestampedDataset": "false",
-						"sortedDataset": "true",
-						"datasetFile": "temperature_sensor.csv",
-						"sensorIdColumnName": "SensorId",
-						"generationRate": {
-							"constant": {
-								"value": 3
-							}
-						}
-
-					}
-				},
-				{
+								
 					"mockSensorPrototype": {
-						"sensorPrototypeName": "motion_detection_sensor",
+						"sensorPrototypeName": "motionDetection_sensor",
+												"evaluateFieldGenerationRate": true,
+						"outputFile": "motion_detection_output.csv",
+
 						"description": "Sensor that detects  movement and return true if motion or false if no motion",
-						"sensorsQuantity": 10,
+						"sensorsQuantity": 3000,
 						"generationRate": {
 							"constant": {
-								"value": 3
+								"value": 8
 							}
 						},
 						"messagePrototype": {
@@ -45,34 +33,19 @@
 								"value": {
 									"distributions": [{
 											"value": true,
-											"probability": 0.1
+											"probability": 0.5
 										},
 										{
 											"value": false,
-											"probability": 0.9
+											"probability": 0.5
 										}
 									]
 								}
 							}]
-						},
-						"scenarios": [{
-							"sensorId": "5",
-							"scenarioName": "thief",
-							"scenarioDelay": "10",
-							"scenarioDuration": "10",
-							"scenarioFieldValueInfoList": [{
-								"sensorFieldScenarioName": "movement",
-								"sensorFieldScenarioGenerationRate": {
-									"value": {
-										"constant": {
-											"value": true
-										}
-									}
-								}
-							}]
-						}]
+						}
+						}
 					}
-				}
+				
 			]
 		}
 	}

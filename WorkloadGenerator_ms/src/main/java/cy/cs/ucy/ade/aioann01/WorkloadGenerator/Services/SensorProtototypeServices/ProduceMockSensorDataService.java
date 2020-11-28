@@ -52,7 +52,6 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 
     private ScenarioManager scenarioManager;
 
-
     private Boolean startedProducing = false;
 
     public ProduceMockSensorDataService(WorkloadGenerator workloadGenerator, MockSensorService mockSensorService, MockSensorPrototypeService mockSensorPrototypeService, List<MockSensorPrototype> mockSensorPrototypes){

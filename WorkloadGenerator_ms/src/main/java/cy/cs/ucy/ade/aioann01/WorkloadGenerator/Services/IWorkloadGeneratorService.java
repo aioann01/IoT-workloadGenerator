@@ -6,7 +6,7 @@ public interface IWorkloadGeneratorService {
 
      void readConfigs(Exchange exchange) throws Exception;
 
-     void initializeReceiverServiceConfiguration(Exchange exchange) throws Exception;
+     void processOutputProtocolConfigurationsAndEstablishConnections(Exchange exchange) throws Exception;
 
      void readSensorDataConfigs(Exchange exchange) throws Exception;
 

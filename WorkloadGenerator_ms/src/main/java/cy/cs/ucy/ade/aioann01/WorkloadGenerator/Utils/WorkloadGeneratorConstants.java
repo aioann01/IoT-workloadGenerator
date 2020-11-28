@@ -17,13 +17,11 @@ public class WorkloadGeneratorConstants {
     public static final String MESSAGE_XML_ELEMENT_END ="</message>";
     public static final String HTTP ="HTTP";
     public static final String PROTOCOL ="protocol";
+    public static final String PROTOCOL_CONFIGS ="protocolConfigs";
     public static final String MQTT ="MQTT";
     public static final String HTTP_SERVERS ="httpServers";
-    public static final String HTTP_CONFIGS ="httpConfigs";
     public static final String MQTT_BROKER_CLUSTERS ="brokerClusters";
-    public static final String MQTT_CONFIGS ="mqttConfigs";
     public static final String KAFKA ="KAFKA";
-    public static final String KAFKA_CONFIGS ="kafkaConfigs";
     public static final String KAFKA_BROKER_CLUSTERS ="kafkaBrokerClusters";
     public static final String TOPIC ="topic";
     public static final String SERVER_ID ="serverIp";

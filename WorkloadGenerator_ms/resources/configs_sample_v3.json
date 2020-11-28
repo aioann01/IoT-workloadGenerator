@@ -1,21 +1,21 @@
 {
 	"configs": {
 		"protocol": "string-{HTTP/MQTT...}",
-		"httpConfigs":{
+		"protocolConfigs":{
 		"requestURI":"string",
 		"httpServers": [{
 			"serverIp": "string",
 			"serverPort": "string"
 		}]
 		},
-		"mqttConfigs": {
+		"protocolConfigs": {
 			"topic": "string",
 			"brokerClusters": [{
 				"serverIp": "string",
 				"serverPort": "string"
 			}]
 		},
-		"kafkaConfigs": {
+		"protocolConfigs": {
 			"topic": "string",
 			"kafkaBrokerClusters": [{
 				"serverIp": "string",
@@ -112,6 +112,7 @@
 					"outputFile": "string",
 					"description": "string",
 					"sensorPrototypeName": "string",
+					"evaluateFieldGenerationRate": "boolean",
 					"sensorsQuantity": "number",
 					"scenarios": [{
 							"sensorId": "integer",

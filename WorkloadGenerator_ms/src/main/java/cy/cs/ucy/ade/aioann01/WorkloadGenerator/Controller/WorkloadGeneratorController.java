@@ -65,7 +65,7 @@ public class WorkloadGeneratorController {
             if (!workloadGeneratorService.isInitialized()) {
                 try {
                     workloadGeneratorService.readConfigs(exchange);
-                    workloadGeneratorService.initializeReceiverServiceConfiguration(exchange);
+                    workloadGeneratorService.processOutputProtocolConfigurationsAndEstablishConnections(exchange);
                     workloadGeneratorService.readSensorDataConfigs(exchange);
                 } catch (Exception exception) {
                     errorMessage = exception.getMessage();

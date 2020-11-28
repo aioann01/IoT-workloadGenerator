@@ -2,8 +2,8 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputProtocolEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.SuccessResponseMessage;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
@@ -18,7 +18,6 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.MqttSensor
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServices.ProduceMockSensorDataService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServices.ReplaySensorCSVDataSetService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -28,19 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-
 
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.*;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorConstants.*;
-import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorConstants.REQUEST_URI;
 
 @Service
 public class WorkloadGeneratorService implements IWorkloadGeneratorService{
@@ -64,15 +57,19 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
     public MqttSensorMessageSendService mqttSensorMessageSendService;
 
     @Autowired
+    public KafkaSensorMessageSendService kafkaSensorMessageSendService;
+
+    @Autowired
     public ApplicationPropertiesService applicationPropertiesService;
 
     private ISensorMessageSendService sensorMessageSendService;
 
+    private ObjectMapper mapper = new ObjectMapper();
+
+
     private List<ISensorDataProducerService> sensorDataProducerServices;
 
-    private static final Logger log= LoggerFactory.getLogger(WorkloadGeneratorService.class);
-
-    private ObjectMapper mapper=new ObjectMapper();
+    private static final Logger log = LoggerFactory.getLogger(WorkloadGeneratorService.class);
 
     public List<ISensorDataProducerService> getSensorDataProducerServices() {
         return sensorDataProducerServices;
@@ -88,7 +85,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
         String errorMessage;
         try {
             String configsDirectory = ApplicationPropertiesUtil.getConfigsDirectory();
-             String json = IOUtils.toString(new FileInputStream(configsDirectory + CONFIG_FILE), StandardCharsets.UTF_8);
+            String json = IOUtils.toString(new FileInputStream(configsDirectory + CONFIG_FILE), StandardCharsets.UTF_8);
             if(json.startsWith(UTF8_BOM))
                 json = json.substring(1);
             JSONObject fileToJson = new JSONObject(json);
@@ -116,170 +113,66 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
         }
     }
 
+    public Boolean isProvidedOutputProtocolSupported(String protocolName){
+        for(OutputProtocolEnum outputProtocol: OutputProtocolEnum.values())
+            if(outputProtocol.getValue().equals(protocolName.toLowerCase())){
+                return true;
+            }
+        return false;
+    }
+
 
     @Override
-    public synchronized void initializeReceiverServiceConfiguration(Exchange exchange) throws Exception{
+    public synchronized void processOutputProtocolConfigurationsAndEstablishConnections(Exchange exchange) throws Exception {
         log.debug("Entered initializeReceiverServiceConfiguration");
-        String errorMessage= null;
+        String errorMessage = null;
 
-        if(workloadGenerator.getConfigs().has(PROTOCOL)) {
-            HashMap<String, String > protocolConfigs = new HashMap<>();
-            if (workloadGenerator.getConfigs().get(PROTOCOL).equals(HTTP)) {
-                if (workloadGenerator.getConfigs().has(HTTP_CONFIGS)) {
-                    JSONObject httpConfigs = workloadGenerator.getConfigs().getJSONObject(HTTP_CONFIGS);
-                    String requestURI;
-                    String requestMethod;
-                    if (httpConfigs.has(REQUEST_URI)) {
-                        requestURI = httpConfigs.get(REQUEST_URI).toString();
-                    } else{
-                        errorMessage = "No requestURI was found in httpConfigs";
-                        throw new ValidationException(errorMessage);}
-//                    if (httpConfigs.has(REQUEST_METHOD)) {
-//                        requestMethod = httpConfigs.get(FrameworkConstants.REQUEST_URI).toString();
-//                    } else{
-//                        errorMessage = "No requestMethod was found in httpConfigs";
-//                        throw new ValidationException(errorMessage);}
-                    protocolConfigs.put(REQUEST_URI , requestURI);
-                    // protocolConfigs.put(REQUEST_METHOD, requestMethod);
-
-                    if (httpConfigs.has(HTTP_SERVERS)) {
-                        List<Server> httpServers;
-                        try {
-                            JSONArray httpServersJsonArray = httpConfigs.getJSONArray(HTTP_SERVERS);
-                            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                            httpServers = mapper.readValue(httpServersJsonArray.toString(), new TypeReference<List<Server>>() {
-                            });
-                            if (httpServers == null || httpServers.isEmpty()) {
-                                errorMessage = " httpServers could not be created.Check logs or verify that file has valid httpServers";
-                                throw new ValidationException(errorMessage);
-                            }
-                        } catch (JSONException | JsonMappingException exception) {
-                            errorMessage = " Couldn't parse httpServers from config file";
-                            log.error(EXCEPTION_CAUGHT + errorMessage + "-" + exception.getMessage(), exception);
-                            throw new ValidationException(errorMessage);
-                        } catch (Exception exception) {
-                            if (exception instanceof ValidationException)
-                                throw exception;
-                            errorMessage = " Couldn't parse httpServers from config file" + exception.getMessage();
-                            log.error(EXCEPTION_CAUGHT + exception.getMessage(), exception);
-                            throw new Exception(errorMessage);
+        if (workloadGenerator.getConfigs().has(PROTOCOL) && workloadGenerator.getConfigs().optString(PROTOCOL) != null) {
+            final String protocol = workloadGenerator.getConfigs().getString(PROTOCOL);
+            if (isProvidedOutputProtocolSupported(protocol)) {
+                JSONObject protocolConfigs = workloadGenerator.getConfigs().optJSONObject(PROTOCOL_CONFIGS);
+                if (protocolConfigs != null) {
+                    switch (protocol) {
+                        case HTTP:
+                            sensorMessageSendService = httpSensorMessageRequestService;
+                            break;
+                        case MQTT:
+                            sensorMessageSendService = mqttSensorMessageSendService;
+                            break;
+                        case KAFKA:
+                            sensorMessageSendService = kafkaSensorMessageSendService;
+                            break;
+                    }
+                    try {
+                        sensorMessageSendService.validateAndProcessConfigs(protocolConfigs);
+                    }catch (Exception exception) {
+                        if (exception instanceof ValidationException) {
+                            errorMessage = VALIDATION_EXCEPTION_CAUGHT + " while validating the protocolConfigs for protocol {" + protocol + "}:" + exception.getMessage();
+                        } else {
+                            errorMessage = UNEXPECTED_ERROR_OCCURRED + " while validating the protocolConfigs for protocol {" + protocol + "}:" + exception.getMessage();
                         }
-                        httpSensorMessageRequestService.initializeServiceReceiverConfigurations(httpServers, protocolConfigs);
-                        sensorMessageSendService = httpSensorMessageRequestService;
-                    } else {
-                        errorMessage = " No httpServers configs was provided for protocol HTTP";
+                        throw new Exception(errorMessage);
+                    }
+                    try {
+                        sensorMessageSendService.initializeConnections();
+                    } catch (Exception exception) {
+                        errorMessage = EXCEPTION_CAUGHT + " while initializing Connections for protocol {" + protocol + "}:" + exception.getMessage();
                         throw new Exception(errorMessage);
                     }
                 } else {
-                    errorMessage = " No httpConfigs was provided for protocol HTTP";
+                    errorMessage = PROTOCOL_CONFIGS + " has not been provided in  configs file";
                     throw new Exception(errorMessage);
                 }
-            }
-            else  if (workloadGenerator.getConfigs().get(PROTOCOL).equals(MQTT)) {
-                if (workloadGenerator.getConfigs().has(MQTT_CONFIGS)) {
-                    JSONObject mqttConfigs = workloadGenerator.getConfigs().getJSONObject(MQTT_CONFIGS);
-                    String topic = null;
-                    if (mqttConfigs.has(TOPIC)) {
-                        topic = mqttConfigs.get(TOPIC).toString();
-                        protocolConfigs.put(TOPIC_NAME, topic);
-                    } else
-                        log.warn("No root topic was provided. Default root topic is none");
-                    if (mqttConfigs.has(MQTT_BROKER_CLUSTERS)) {
-                        List<Server> mqttBrokerServers;
-                        try {
-                            JSONArray mqttBrokersJsonArray = mqttConfigs.getJSONArray(MQTT_BROKER_CLUSTERS);
-                            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                            mqttBrokerServers = mapper.readValue(mqttBrokersJsonArray.toString(), new TypeReference<List<Server>>() {
-                            });
-                            if (mqttBrokerServers == null || mqttBrokerServers.isEmpty()) {
-                                errorMessage = " mqttBrokerServers could not be created.Check logs or verify that file has valid mqttBrokerServers";
-                                throw new ValidationException(errorMessage);
-                            }
-                        } catch (JSONException | JsonMappingException exception) {
-                            errorMessage = " Couldn't parse mqtt brokerClusters from config file";
-                            log.error(EXCEPTION_CAUGHT + errorMessage + "-" + exception.getMessage(), exception);
-                            throw new ValidationException(errorMessage);
-                        } catch (Exception exception) {
-                            if (exception instanceof ValidationException)
-                                throw exception;
-                            errorMessage = " Couldn't parse mqttBrokerClusters from config file" + exception.getMessage();
-                            log.error(EXCEPTION_CAUGHT + exception.getMessage(), exception);
-                            throw new Exception(errorMessage);
-                        }
-                        try {
-
-                            mqttSensorMessageSendService.initializeServiceReceiverConfigurations(mqttBrokerServers, protocolConfigs);
-                        }catch (Exception exception){
-                            log.error("Error while initializing MQTT Configurations due to:" + exception.getMessage());
-                            throw new Exception("Error while initializing MQTT Configurations due to:" + exception.getMessage());
-                        }
-                        sensorMessageSendService = mqttSensorMessageSendService;
-                    }
-                    else {
-                        errorMessage = " No brokerClusters configs was provided for protocol MQTT";
-                        throw new Exception(errorMessage);
-                    }
-                }
-                else{
-                    errorMessage = " No mqttConfigs was provided for protocol MQTT";
-                    throw new Exception(errorMessage);
-                }
-            }
-            else  if (workloadGenerator.getConfigs().get(PROTOCOL).equals(KAFKA)) {
-                if (workloadGenerator.getConfigs().has(KAFKA_CONFIGS)) {
-                    JSONObject kafkaConfigs = workloadGenerator.getConfigs().getJSONObject(KAFKA_CONFIGS);
-                    String topic = null;
-                    if (kafkaConfigs.has(TOPIC)) {
-                        topic = kafkaConfigs.get(TOPIC).toString();
-                        protocolConfigs.put(TOPIC_NAME, topic);
-                    } else
-                        log.warn("No root topic was provided. Default root topic is none");
-                    if (kafkaConfigs.has(KAFKA_BROKER_CLUSTERS)) {
-                        List<Server> kafkaBrokers;
-                        try {
-                            JSONArray kafkaBrokersJsonArray = kafkaConfigs.getJSONArray(KAFKA_BROKER_CLUSTERS);
-                            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                            kafkaBrokers = mapper.readValue(kafkaBrokersJsonArray.toString(), new TypeReference<List<Server>>() {
-                            });
-                            if (kafkaBrokers == null || kafkaBrokers.isEmpty()) {
-                                errorMessage = " kafkaBrokers could not be created.Check logs or verify that file has valid kafkaBrokersClusters";
-                                throw new ValidationException(errorMessage);
-                            }
-                        } catch (JSONException | JsonMappingException exception) {
-                            errorMessage = " Couldn't parse  kafkaBrokers from config file";
-                            log.error(EXCEPTION_CAUGHT + errorMessage + "-" + exception.getMessage(), exception);
-                            throw new ValidationException(errorMessage);
-                        } catch (Exception exception) {
-                            if (exception instanceof ValidationException)
-                                throw exception;
-                            errorMessage = " Couldn't parse kafkaBrokers from config file" + exception.getMessage();
-                            log.error(EXCEPTION_CAUGHT + exception.getMessage(), exception);
-                            throw new Exception(errorMessage);
-                        }
-                        KafkaSensorMessageSendService kafkaSensorMessageSendService = new KafkaSensorMessageSendService();
-                        kafkaSensorMessageSendService.initializeServiceReceiverConfigurations(kafkaBrokers, protocolConfigs);
-                        sensorMessageSendService = kafkaSensorMessageSendService;
-                    }
-                    else {
-                        errorMessage = " No kafkaBrokers configs was provided for protocol KAFKA";
-                        throw new Exception(errorMessage);
-                    }
-                }
-                else{
-                    errorMessage = " No kafkaConfigs was provided for protocol KAFKA";
-                    throw new Exception(errorMessage);
-                }
-            }
-            else {
-                errorMessage = " Protocol "+workloadGenerator.getConfigs().get(PROTOCOL)+" is not provided.Please provide one of the supported protocols :{HTTP,MQTT}";
+            } else {
+                errorMessage = " Protocol " + workloadGenerator.getConfigs().get(PROTOCOL) + " is not supported. Please provide one of the supported protocols :" + OutputProtocolEnum.getSupportedProtocols();
                 throw new Exception(errorMessage);
             }
-        }
-        else{
-            errorMessage = " Protocol type has not been provided in configs file. Please provide one of the supported protocols :{HTTP,MQTT,KAFKA}";
+        } else {
+            errorMessage = " Protocol type has not been provided in configs file. Please provide one of the supported protocols " + OutputProtocolEnum.getSupportedProtocols();
             throw new Exception(errorMessage);
         }
     }
+
 
 
 
@@ -420,10 +313,9 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
             workloadGenerator.setInitialized(false);
             try {
                 readConfigs(exchange);
-                initializeReceiverServiceConfiguration(exchange);
+                processOutputProtocolConfigurationsAndEstablishConnections(exchange);
                 readSensorDataConfigs(exchange);
                 start(exchange);
-                // started2=true;
             } catch (Exception exception) {
                 log.error(UNEXPECTED_EXCEPTION_CAUGHT + "while trying to start workloadGenerator" + exception.getMessage());
                 throw exception;
@@ -439,7 +331,6 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
     public boolean isInitialized(){
         return workloadGenerator.isInitialized();
     }
-
 
 
     public synchronized void setNotInitialized()throws Exception{

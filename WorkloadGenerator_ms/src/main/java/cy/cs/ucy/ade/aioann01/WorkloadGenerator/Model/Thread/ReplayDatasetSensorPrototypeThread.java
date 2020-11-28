@@ -217,11 +217,7 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
                     this.recordsCount++;
                     this.totalWaitTime += waitTime;
                     if (message != null){
-                        try {
                             datasetSensorPrototypeService.sendMessage(sensorId, message, datasetSensorPrototype.getSensorMessageEnum());
-                        }catch (Exception exception){
-                            log.error("Could not send message "+message +" for sensorId"+sensorId+" due to ",exception.getMessage());
-                        }
                     }
                     log.trace("Sending message: "+message+" for sensorId {"+sensorId+"}");
                 }

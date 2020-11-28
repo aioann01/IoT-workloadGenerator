@@ -18,10 +18,15 @@ import java.util.List;
 @Service
 public class ReplaySensorCSVDataSetService implements ISensorDataProducerService {
     private WorkloadGenerator workloadGenerator;
+
     private DatasetSensorPrototypeService datasetSensorPrototypeService;
+
     private List<ReplayDatasetSensorPrototypeThread> replayDatasetSensorPrototypeThreads;
+
     private List<DatasetSensorPrototype> datasetSensorPrototypes;
+
     private static final Logger log= LoggerFactory.getLogger(ReplaySensorCSVDataSetService.class);
+
     private boolean startedProducing = false;
 
     public ReplaySensorCSVDataSetService(WorkloadGenerator workloadGenerator,DatasetSensorPrototypeService datasetSensorPrototypeService, List<DatasetSensorPrototype> datasetSensorPrototypes){

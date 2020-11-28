@@ -21,7 +21,7 @@ httpServerprintStatisticsURL =  HTTPS_PROTOCOL + host + ":" + HTTP_SERVER_PORT +
 
 #PAYLOADS
 EMPTY_JSON = {}
-httpPreparePaylaod = {'sensorPrototypeName':'huminity',"messageIntervalTime":messageIntervalTime}
+httpPreparePaylaod = {'sensorPrototypeName':'motionDetection',"messageIntervalTime":messageIntervalTime}
 def printAvg():
     with open('temperature_AccuracyEvaluation,json') as json_file:
         data = json.load(json_file)

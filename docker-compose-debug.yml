@@ -22,8 +22,9 @@ services:
       - AUTHORIZATION.ENABLED=false
       - logging.level.*=INFO
       - LOGGING_FILE=/home/logs/server.log
-      - logging.level.cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.*=TRACE
-      - logging.level.cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.*=TRACE
+      - logging.level.cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.*=INFO
+      #- logging.level.cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.*=TRACE
+      #- logging.level.cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.*=TRACE
       - CONFIGS_DIRECTORY=/home/configs/
       - RESOURCES_DIRECTORY=/home/resources/      
     ports:
@@ -55,7 +56,7 @@ services:
     environment:
       - JAVA_OPTS="-Xmx1G -Xms1G"
       - SERVER_PORT=8095
-      - logging.level=INFO,DEBUG,ERROR
+      - logging.level=INFO,ERROR
       - LOGGING_FILE=/home/logs/server.log
       - logging.level.web=DEBUG
     ports:

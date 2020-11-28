@@ -54,8 +54,8 @@ public class WorkloadGeneratorPerformanceTestingService {
             while(workloadGeneratorAccuracyPerformanceThread.getBlockingDeque().size() !=0 );
             for(Map.Entry<String, SensorMetrics> sensorMetrics : workloadGeneratorAccuracyPerformanceThread.getSensorsMetricsMap().entrySet()){
                 Double sensorAvgDelay = sensorMetrics.getValue().getSensorsMessagesDelaySum()/sensorMetrics.getValue().getSensorsMessagesCount();
-                totalSensorsAvgDelay+=sensorAvgDelay;
-                totalSensorsCount+=1;
+                totalSensorsAvgDelay += sensorAvgDelay;
+                totalSensorsCount += 1;
             }
             statisticsJSONObject.put("avgSensorMessageDelay", totalSensorsAvgDelay/totalSensorsCount);
             jsonWriter.append(statisticsJSONObject.toString());

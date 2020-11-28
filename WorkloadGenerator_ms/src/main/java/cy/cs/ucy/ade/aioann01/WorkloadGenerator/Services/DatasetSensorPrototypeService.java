@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static com.google.code.externalsorting.csv.CsvExternalSort.DEFAULTMAXTEMPFILES;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.*;
@@ -311,12 +312,12 @@ public class DatasetSensorPrototypeService {
 
 
     public void sendMessage(String sensorId, String message, SensorMessageEnum contentType) throws RuntimeException{
-        try {
-            sensorMessageSendService.sendMessage(sensorId, message, contentType);
-        }catch (Exception exception){
-            log.error("Error while sending sensor message: "+exception.getMessage(),exception);
-        }
-
+        CompletableFuture.runAsync(() -> {
+            try {
+                sensorMessageSendService.sendMessage(sensorId, message, contentType);
+            }catch (Exception exception){
+                log.error("Could not send message "+message +" for sensorId"+sensorId+" due to ",exception.getMessage(), exception);
+            }});
     }
 
 }
