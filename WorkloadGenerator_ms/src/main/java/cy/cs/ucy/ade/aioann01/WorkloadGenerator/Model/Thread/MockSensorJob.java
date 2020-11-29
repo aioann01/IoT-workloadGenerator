@@ -152,7 +152,7 @@ public class MockSensorJob extends Thread{
             logToFile(message);
         }
         SensorMessageEnum contentType = getMockSensor().getMockSensorPrototype().getMessagePrototype().getSensorMessageType();
-        String sensorId = getMockSensor().getMockSensorPrototype().getSensorPrototypeName()+"_" + getMockSensor().getId();
+        String sensorId = getMockSensor().getId();
         asyncCallToSendMessage(sensorId, message, contentType);
     }
 

@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Scenario{
 
+    @JsonProperty("sensorId")
     private String sensorId;
 
     @JsonProperty("scenarioDelay")
@@ -15,10 +16,8 @@ public class Scenario{
     @JsonProperty("scenarioDuration")
     private Integer scenarioDuration;
 
-
     @JsonProperty("scenarioFieldValueInfoList")
     private List<ScenarioFieldValueInfo> scenarioFieldValueInfoList;
-
 
     @JsonProperty("scenarioName")
     private String scenarioName;

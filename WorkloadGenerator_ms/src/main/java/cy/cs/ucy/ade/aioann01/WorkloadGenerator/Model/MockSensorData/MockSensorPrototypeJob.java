@@ -12,16 +12,16 @@ public class MockSensorPrototypeJob {
 
     private MockSensorPrototype mockSensorPrototype;
 
-    private AtomicInteger  sensorsNumber;
+    private AtomicInteger sensorsNumber;
 
-    private AtomicInteger  counter;
+    private AtomicInteger counter;
 
 
     public MockSensorPrototypeJob(MockSensorPrototype mockSensorPrototype){
-        this.mockSensorPrototype=mockSensorPrototype;
-        this.mockSensorPrototypeName=mockSensorPrototype.getSensorPrototypeName();
-        this.counter=new AtomicInteger(0);
-        this.sensorsNumber=new AtomicInteger(0);
+        this.mockSensorPrototype = mockSensorPrototype;
+        this.mockSensorPrototypeName = mockSensorPrototype.getSensorPrototypeName();
+        this.counter = new AtomicInteger(0);
+        this.sensorsNumber = new AtomicInteger(0);
 
     }
 

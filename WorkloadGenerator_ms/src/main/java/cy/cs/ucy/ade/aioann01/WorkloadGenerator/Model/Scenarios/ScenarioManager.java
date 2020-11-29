@@ -1,6 +1,7 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.MockSensorJob;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.ScenarioJob;
 
 import java.util.ArrayList;
 import java.util.List;

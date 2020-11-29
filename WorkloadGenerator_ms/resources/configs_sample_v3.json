@@ -2,20 +2,15 @@
 	"configs": {
 		"protocol": "string-{HTTP/MQTT...}",
 		"protocolConfigs":{
-		"requestURI":"string",
+				"requestURI":"string",
 		"httpServers": [{
 			"serverIp": "string",
 			"serverPort": "string"
-		}]
-		},
-		"protocolConfigs": {
-			"topic": "string",
+		}],
 			"brokerClusters": [{
 				"serverIp": "string",
 				"serverPort": "string"
-			}]
-		},
-		"protocolConfigs": {
+			}],
 			"topic": "string",
 			"kafkaBrokerClusters": [{
 				"serverIp": "string",

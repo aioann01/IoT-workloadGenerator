@@ -132,7 +132,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
             if (isProvidedOutputProtocolSupported(protocol)) {
                 JSONObject protocolConfigs = workloadGenerator.getConfigs().optJSONObject(PROTOCOL_CONFIGS);
                 if (protocolConfigs != null) {
-                    switch (protocol) {
+                    switch (OutputProtocolEnum.getEnumByValue(protocol)) {
                         case HTTP:
                             sensorMessageSendService = httpSensorMessageRequestService;
                             break;
@@ -156,11 +156,11 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
                     try {
                         sensorMessageSendService.initializeConnections();
                     } catch (Exception exception) {
-                        errorMessage = EXCEPTION_CAUGHT + " while initializing Connections for protocol {" + protocol + "}:" + exception.getMessage();
+                        errorMessage = EXCEPTION_CAUGHT_WHILE + " while initializing Connections for protocol {" + protocol + "}:" + exception.getMessage();
                         throw new Exception(errorMessage);
                     }
                 } else {
-                    errorMessage = PROTOCOL_CONFIGS + " has not been provided in  configs file";
+                    errorMessage = PROTOCOL_CONFIGS + " has not been provided in configs file";
                     throw new Exception(errorMessage);
                 }
             } else {
@@ -197,7 +197,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
                         else
                             mockSensorPrototypes.add(mockSensorPrototype);
                     }
-                    else  if(jsonObject.has(DATASET_SENSOR_PROTOTYPE)){
+                    else if(jsonObject.has(DATASET_SENSOR_PROTOTYPE)){
                         DatasetSensorPrototype datasetSensorPrototype = mapper.readValue(jsonObject.getJSONObject(DATASET_SENSOR_PROTOTYPE).toString(), new TypeReference<DatasetSensorPrototype>(){});
                         if(datasetSensorPrototype == null)
                             log.error("dataSetSensorPrototype could not be parsed");

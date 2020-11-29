@@ -2,9 +2,7 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums;
 
 import org.apache.tomcat.util.buf.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public enum OutputProtocolEnum {
@@ -12,7 +10,15 @@ public enum OutputProtocolEnum {
     MQTT ("MQTT"),
     KAFKA("KAFKA");
 
-    private String value;
+
+    private static Map<String,OutputProtocolEnum> enumMap;
+
+    static {
+        enumMap = new HashMap<>();
+        Arrays.stream(values())
+                .forEach(enumeration -> enumMap.put(enumeration.getValue(), enumeration));
+    }
+    private final String value;
 
     OutputProtocolEnum(String value){
         this.value = value;
@@ -23,8 +29,12 @@ public enum OutputProtocolEnum {
         return value.toLowerCase();
     }
 
+    public static OutputProtocolEnum getEnumByValue(String value) {
+        return enumMap.get(value.toLowerCase());
+    }
+
     public static String getSupportedProtocols(){
-    return "["+ StringUtils.join(getNames(OutputProtocolEnum.class),',') +"]";
+        return "["+ StringUtils.join(getNames(OutputProtocolEnum.class),',') +"]";
 
 
     }

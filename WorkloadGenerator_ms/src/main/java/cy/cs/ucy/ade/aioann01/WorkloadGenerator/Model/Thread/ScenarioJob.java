@@ -1,11 +1,9 @@
-package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios;
+package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread;
 
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensor;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.MockSensorJob;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Timer;
 import java.util.TimerTask;
 
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.MILISECONDS_TO_SECONDS;

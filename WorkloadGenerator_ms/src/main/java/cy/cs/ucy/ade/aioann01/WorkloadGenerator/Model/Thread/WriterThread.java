@@ -172,7 +172,7 @@ public class WriterThread extends Thread {
                         mockSensorPrototypeOutputFileInfo.getFileWriter().flush();
 
                     } catch (IOException e) {
-                        log.error(EXCEPTION_CAUGHT+"inside WriterThread run() - Could not create file: "+e.getMessage());
+                        log.error(EXCEPTION_CAUGHT_WHILE + "inside WriterThread run() - Could not create file: "+e.getMessage());
                         throw  new RuntimeException("Could not write sensor message to file due to:"+e.getMessage());
                     }
                 }

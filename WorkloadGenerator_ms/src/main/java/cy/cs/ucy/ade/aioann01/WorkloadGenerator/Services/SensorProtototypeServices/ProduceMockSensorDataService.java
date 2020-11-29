@@ -38,8 +38,6 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 
     private static final Logger log = LoggerFactory.getLogger(ProduceMockSensorDataService.class);
 
-    private ObjectMapper mapper = new ObjectMapper();
-
     private MockSensorPrototypeService mockSensorPrototypeService;
 
     private MockSensorService mockSensorService;
@@ -62,76 +60,223 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 
     }
 
-
-
-    public void createMockSensors(Exchange exchange) throws Exception{
-        log.debug("Entered createSensors()");
+    @Override
+    public void initiate(Exchange exchange,ISensorMessageSendService sensorMessageSendService) throws Exception{
+        log.debug("Entered initiate() of ProduceMockSensorDataService");
+        this.sensorMessageSendService = sensorMessageSendService;
         String errorMessage;
         List<MockSensorPrototypeJob> mockSensorPrototypeJobs;
         List<MockSensor> mockSensors;
+        try {
+            mockSensorPrototypeJobs = createAndProcessMockSensorPrototypeJobsFromMockSensorPrototypes();
+        }catch (Exception exception){
+            errorMessage = EXCEPTION_CAUGHT_WHILE + "while creating mockSensorPrototypeJobs from mockSensorPrototypes: " + exception.getMessage();
+            log.error(errorMessage, exception);
+            throw new Exception(errorMessage, exception);
+        }
+        try {
+            createAndProcessOutputWriterThread(mockSensorPrototypeJobs);
+        }catch (Exception exception){
+            errorMessage = UNEXPECTED_ERROR_OCCURRED + "while creating output Writer Thread:"+exception.getMessage();
+            log.error(errorMessage, exception);
+            throw new Exception(errorMessage, exception);
+        }
+        try {
+            mockSensors = createMockSensors(mockSensorPrototypeJobs);
+        }catch (Exception exception){
+            errorMessage = UNEXPECTED_ERROR_OCCURRED + "while creating Mock Sensors: " + exception.getMessage();
+            log.error(errorMessage, exception);
+            throw new Exception(errorMessage, exception);
+        }
+        mockSensorService.addAllMockSensors(mockSensors);
+        mockSensorPrototypes = mockSensorPrototypeJobs.stream()
+                .map(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype())
+                .collect(Collectors.toList());
+        mockSensorPrototypeService.addAllMockSensorPrototype(mockSensorPrototypes);
+        workloadGenerator.setMockSensorPrototypeJobs(mockSensorPrototypeJobs);
+        Integer delay = (Integer)exchange.getProperty(DELAY);
+        if(delay == null)
+            delay = 0;
+        final int startUpDelay = delay;
+        System.out.println(Thread.currentThread().getId()+" "+Thread.currentThread().getName());
+
+//            Integer threadPoolSize = null;
+//            try{
+//                threadPoolSize =  Integer.parseInt(ApplicationPropertiesUtil.readPropertyFromConfigs(THREAD_POOL_SIZE_PROPERTY));
+//            }
+//            catch (Exception e){
+//                log.info("Thread pool size prioperty not provided. Default thread pool size is the number of sensors.");
+//            }
+//            if(threadPoolSize == null)
+//                threadPoolSize = mockSensorService.getAllMockSensors().size();
+        //ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(threadPoolSize);
+        //ConcurrentHashMap<String, ScheduledFuture<?>> mockSensorJobFutures = new ConcurrentHashMap<>();
+
+        List<MockSensorJob> mockSensorJobs;
+        mockSensorJobs = createAndStartMockSensorJobs();
+        try {
+            processAndScheduleScenarios(mockSensorJobs);
+        }catch (Exception exception){
+            errorMessage = EXCEPTION_CAUGHT_WHILE + "while scheduling scenarios "+ exception.getMessage();
+            log.error(errorMessage, exception);
+        }
+        workloadGenerator.setMockSensorJobs(mockSensorJobs);
+        startedProducing = true;
+    }
+
+    @Override
+    public void pause(Exchange exchange) throws Exception {
+        log.debug("Entered pause() of ProduceMockSensorDataService");
+
+        if(scenarioManager != null)
+            scenarioManager.cancelScenarioJobs();
+        cancelAllMockSensorJobs();
+        if (workloadGenerator.isWriteToOutputFile()) {
+            while (workloadGenerator.getWriterThread().getBlockingDeque().size() != 0) ;
+            workloadGenerator.getWriterThread().pause();
+        }
+        startedProducing = false;
+
+        workloadGenerator.getMockSensorPrototypes().stream()
+                .filter(mockSensorPrototype -> mockSensorPrototype.getEvaluateFieldGenerationRate())
+                .forEach(mockSensorPrototype -> {
+                    List<MockSensorJob> mockSensorJobs = workloadGenerator.getMockSensorJobs().stream()
+                            .filter(mockSensorJob -> mockSensorJob.getMockSensor().getMockSensorPrototype().getSensorPrototypeName().equals(mockSensorPrototype.getSensorPrototypeName()))
+                            .collect(Collectors.toList());
+                    SensorFieldStatistics[] sensorFieldStatistics = mockSensorJobs.get(0).getSensorFieldStatistics();
+                    for(int i =1;i<mockSensorJobs.size();++i){
+                        for(int j=0;j<mockSensorJobs.get(i).getSensorFieldStatistics().length;++j) {
+                            SensorFieldStatistics fieldStatistics = mockSensorJobs.get(i).getSensorFieldStatistics()[j];
+                            SensorUtils.mergeSensorFieldStatistics(sensorFieldStatistics[j], fieldStatistics);
+                        }
+                    }
+                    SensorUtils.exportSensorPrototypes(sensorFieldStatistics, 0,mockSensorPrototype.getSensorPrototypeName(), 0);
+                });
+    }
+
+    @Override
+    public void resume(Exchange exchange) throws Exception {
+        log.debug("Entered resume() of ProduceMockSensorDataService");
+
+        if(!workloadGenerator.isStarted() && workloadGenerator.isWriteToOutputFile()) {
+            workloadGenerator.getWriterThread().resume2();
+        }
+
+        workloadGenerator.getMockSensorJobs().parallelStream()
+                .forEach(mockSensorJob -> {
+                    try {
+                        mockSensorJob.resume2();
+                    } catch (Exception e) {
+                        log.error("SensorJob {"+mockSensorJob.getMockSensor().getId()+ "} could not be resumed due to:"+e.getMessage(), e);
+                    }
+                });
+//        workloadGenerator.getMockSensorJobs().stream()
+//                .forEach(mockSensorJob -> {
+//                    try{
+//                        mockSensorJob.resume2();
+//                    }catch (Exception exception){}
+//                });
+        startedProducing = true;
+    }
+
+    @Override
+    public void terminate(Exchange exchange) throws Exception {
+        log.debug("Entered terminate() of ProduceMockSensorDataService");
+
+        terminateWriterThread();
+        clearMockSensorRepository();
+        clearMockSensorPrototypeRepository();
+        workloadGenerator.getMockSensorJobs()
+                .stream().forEach(mockSensorJob -> {
+            try {
+                mockSensorJob.terminate();
+            } catch (Exception e) {
+                log.error("SensorJob {"+mockSensorJob.getMockSensor().getId()+"} could not be terminated successfully");
+            }
+        });
+
+    }
+
+    @Override
+    public boolean isStartedProducing() {
+        return startedProducing;
+    }
+
+
+    public List<MockSensorPrototypeJob> createAndProcessMockSensorPrototypeJobsFromMockSensorPrototypes() throws Exception{
+        log.debug("Entered createAndProcessMockSensorPrototypeJobs()");
+        String errorMessage;
+        List<MockSensorPrototypeJob> mockSensorPrototypeJobs;
         try {
             mockSensorPrototypeJobs = mockSensorPrototypes.stream()
                     .map(sensorPrototype -> new MockSensorPrototypeJob(sensorPrototype))
                     .collect(Collectors.toList());
         }catch (Exception  exception) {
-            errorMessage = "Couldn't create MockSensorJobs from  mockSensorPrototypes ";
-            log.error(EXCEPTION_CAUGHT + errorMessage+"-"+exception.getMessage(), exception);
-            throw new Exception(errorMessage);}
+            errorMessage = "Couldn't create MockSensorPrototypeJobs from mockSensorPrototypes:" +exception.getMessage();
+            log.error(errorMessage, exception);
+            throw new Exception(errorMessage);
+        }
+        if(mockSensorPrototypeJobs == null || mockSensorPrototypeJobs.isEmpty()){
+            errorMessage = "MockSensorPrototypeJobs could not be created.Please Check logs or verify that file has valid sensorsPrototypes";
+            throw new Exception(errorMessage);
+        }
         try{
             for(MockSensorPrototypeJob mockSensorPrototypeJob : mockSensorPrototypeJobs)
                 SensorUtils.createSensorPrototypeMessagePrototype(mockSensorPrototypeJob.getMockSensorPrototype());
-            if(mockSensorPrototypeJobs == null || mockSensorPrototypeJobs.isEmpty()){
-                errorMessage = "mockSensorJobs could not be created.Pleas Check logs or verify that file has valid sensors";
-                throw new Exception(errorMessage);
-            }
-            Optional<Boolean> createWriterThreadOptional = mockSensorPrototypeJobs.stream()
-                    .filter(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype().getOutputFile() != null)
-                    .findAny()
-                    .map(mockSensorPrototypeJob -> true);
-            if(createWriterThreadOptional.isPresent() && createWriterThreadOptional.get()){
-                log.debug("Will create writerThread");
-                workloadGenerator.setWriteToOutputFile(true);
-                WriterThread writerThread = new WriterThread();
-                workloadGenerator.setWriterThread(writerThread);
-                workloadGenerator.getWriterThread().start();
-            }
-            else {
-                workloadGenerator.setWriteToOutputFile(false);
-            }
-            mockSensorPrototypeJobs.stream()
-                    .filter(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype().getOutputFile() != null)
-                    .forEach(mockSensorPrototypeJob -> {
-                        try{
-                            workloadGenerator.getWriterThread().addMockSensorPrototypeOutputFileInfo(mockSensorPrototypeJob.getMockSensorPrototype());}
-                        catch (Exception exception){
-                            log.error(EXCEPTION_CAUGHT+"while creating filewriter for outpuf file for mockSensorPrototype {"+mockSensorPrototypeJob.getMockSensorPrototypeName()+"}. Will not export to outpuf file for this mockSensorPortotype.",exception);
-                        }}
-                    );
-
-        }catch (Exception e) {
-            errorMessage = "Couldn't initialize MockSensorJobs MockSensorPrototype's values due to:" + e.getMessage();
-            log.error(errorMessage);
+        }catch (Exception  exception) {
+            errorMessage = "Failure while processing MockSensorPrototypeJobs from mockSensorPrototypes: "+exception.getMessage();
+            log.error(errorMessage, exception);
             throw new Exception(errorMessage);
-        } try{
-            mockSensors = mockSensorPrototypeJobs.stream()
+        }
+        return mockSensorPrototypeJobs;
+    }
+
+
+    public void createAndProcessOutputWriterThread(List<MockSensorPrototypeJob> mockSensorPrototypeJobs){
+        log.debug("Entered createOutputWriterThread()");
+        Optional<Boolean> createWriterThreadOptional = mockSensorPrototypeJobs.stream()
+                .filter(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype().getOutputFile() != null)
+                .findAny()
+                .map(mockSensorPrototypeJob -> true);
+        if(createWriterThreadOptional.isPresent() && createWriterThreadOptional.get()){
+            log.debug("Will create writerThread");
+            workloadGenerator.setWriteToOutputFile(true);
+            WriterThread writerThread = new WriterThread();
+            workloadGenerator.setWriterThread(writerThread);
+            workloadGenerator.getWriterThread().start();
+        }
+        else {
+            workloadGenerator.setWriteToOutputFile(false);
+        }
+        mockSensorPrototypeJobs.stream()
+                .filter(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype().getOutputFile() != null)
+                .forEach(mockSensorPrototypeJob -> {
+                    try{
+                        workloadGenerator.getWriterThread().addMockSensorPrototypeOutputFileInfo(mockSensorPrototypeJob.getMockSensorPrototype());}
+                    catch (Exception exception){
+                        log.error(EXCEPTION_CAUGHT+"while creating fileWriter for output file for mockSensorPrototype {"+mockSensorPrototypeJob.getMockSensorPrototypeName()+"}. Will not export to outpuf file for this mockSensorPortotype.",exception);
+                    }}
+                );
+    }
+
+
+    public List<MockSensor> createMockSensors(List<MockSensorPrototypeJob> mockSensorPrototypeJobs) throws Exception{
+        log.debug("Entered createMockSensors()");
+        String errorMessage = "";
+        try{
+            return mockSensorPrototypeJobs.stream()
                     .map(mockSensorPrototypeJob -> mockSensorPrototypeJob.createMockSensors())
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
-            mockSensorService.addAllMockSensors(mockSensors);
-            mockSensorPrototypes = mockSensorPrototypeJobs.stream()
-                    .map(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype())
-                    .collect(Collectors.toList());
-            mockSensorPrototypeService.addAllMockSensorPrototype(mockSensorPrototypes);
-            workloadGenerator.setMockSensorPrototypeJobs(mockSensorPrototypeJobs);
         }catch (Exception exception){
-            errorMessage = "Couldn't create mockSensors from  mockSensorPrototypes ";
-            log.error(EXCEPTION_CAUGHT + errorMessage + "-" + exception.getMessage(), exception);
+            errorMessage = "Couldn't create mockSensors from mockSensorPrototypes: " + exception.getMessage();
+            log.error(errorMessage , exception);
             throw new Exception(errorMessage);
         }
     }
 
 
-    private List<Scenario> processValidScenarios(MockSensorPrototype mockSensorPrototype){
+    private List<Scenario> getValidScenarios(MockSensorPrototype mockSensorPrototype){
         List<Scenario> validScenarios = new ArrayList<>();
         for(Scenario scenario: mockSensorPrototype.getScenarios()){
             if(scenario.getScenarioName() == null){
@@ -150,8 +295,8 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
                 log.warn("ScenarioFieldValueInfoList for scenario {"+scenario.getScenarioName()+"} is empty or not provided. Scenario will be ignored.");
                 continue;
             }
-                List<ScenarioFieldValueInfo> validScenarioFieldValueInfoList = getValidScenarioFieldValueInfoForMockSensorPrototype(scenario.getScenarioName(), scenario.getScenarioFieldValueInfoList(), mockSensorPrototype.getMessagePrototype().getFieldsPrototypes());
-                scenario.setScenarioFieldValueInfoList(validScenarioFieldValueInfoList);
+            List<ScenarioFieldValueInfo> validScenarioFieldValueInfoList = getValidScenarioFieldValueInfoForMockSensorPrototype(scenario.getScenarioName(), scenario.getScenarioFieldValueInfoList(), mockSensorPrototype.getMessagePrototype().getFieldsPrototypes());
+            scenario.setScenarioFieldValueInfoList(validScenarioFieldValueInfoList);
             try{
                 String sensorId = validateAndProcessScenarioSensorId(scenario, mockSensorPrototype.getSensorPrototypeName(), mockSensorPrototype.getSensorsQuantity());
                 scenario.setSensorId(sensorId);
@@ -190,6 +335,7 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
         return validScenarioFieldValueInfoList;
     }
 
+
     public String validateAndProcessScenarioSensorId(Scenario scenario, String mockSensorPrototypeName, int mockSensorPrototypeQuantity) throws ValidationException {
         if(scenario.getSensorId() ==  null){
             throw new ValidationException("SensorId for scenario {"+scenario.getScenarioName()+"} was not provided. Scenario will be ignored.");
@@ -207,147 +353,54 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
     }
 
 
-    @Override
-    public void initiate(Exchange exchange,ISensorMessageSendService sensorMessageSendService) throws Exception{
-        log.debug("Entered initiate()");
-        this.sensorMessageSendService = sensorMessageSendService;
-        String errorMessage;
-        try{
-            createMockSensors(exchange);
-            Integer delay = (Integer)exchange.getProperty(DELAY);
-            if(delay == null)
-                delay = 0;
-            final int startUpDelay = delay;
-            System.out.println(Thread.currentThread().getId()+" "+Thread.currentThread().getName());
-//            Integer threadPoolSize = null;
-//            try{
-//                threadPoolSize =  Integer.parseInt(ApplicationPropertiesUtil.readPropertyFromConfigs(THREAD_POOL_SIZE_PROPERTY));
-//            }
-//            catch (Exception e){
-//                log.info("Thread pool size prioperty not provided. Default thread pool size is the number of sensors.");
-//            }
-//            if(threadPoolSize == null)
-//                threadPoolSize = mockSensorService.getAllMockSensors().size();
-            //ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(threadPoolSize);
-            //ConcurrentHashMap<String, ScheduledFuture<?>> mockSensorJobFutures = new ConcurrentHashMap<>();
-            List<Scenario> scenarioList = mockSensorPrototypes.stream()
-                    .filter(mockSensorPrototype -> mockSensorPrototype.getScenarios() !=  null && !mockSensorPrototype.getScenarios().isEmpty())
-                    .map(mockSensorPrototype -> processValidScenarios(mockSensorPrototype))
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
+    public void processAndScheduleScenarios(List<MockSensorJob> mockSensorJobs) {
+        log.debug("Entered processAndScheduleScenarios()");
+        List<Scenario> validScenarios = mockSensorPrototypes.stream()
+                .filter(mockSensorPrototype -> mockSensorPrototype.getScenarios() != null && !mockSensorPrototype.getScenarios().isEmpty())
+                .map(mockSensorPrototype -> getValidScenarios(mockSensorPrototype))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        if (!validScenarios.isEmpty()) {
+            log.info("Valid scenarios found!");
+            scenarioManager = new ScenarioManager(validScenarios, mockSensorJobs);
+        }
+    }
 
-            log.info("Creating {" + mockSensorService.getAllMockSensors().size() + "} mock Sensors....");
-            CopyOnWriteArrayList<MockSensorJob> mockSensorJobs = new CopyOnWriteArrayList<>();
+
+    public CopyOnWriteArrayList<MockSensorJob> createAndStartMockSensorJobs() throws Exception{
+        log.debug("Entered createAndStartMockSensorJobs()");
+        String errorMessage = "";
+        log.info("Creating {" + mockSensorService.getAllMockSensors().size() + "} mock Sensors....");
+        CopyOnWriteArrayList<MockSensorJob> mockSensorJobs = new CopyOnWriteArrayList<>();
+        try {
             mockSensorService.getAllMockSensors().parallelStream()
                     .map(mockSensor -> new MockSensorJob(mockSensor))
                     .forEach(mockSensorJob -> {
-                        if (/*!finalInitialized &&*/ mockSensorJob.getMockSensor().getMockSensorPrototype().getOutputFile() != null) {
+                        if (mockSensorJob.getMockSensor().getMockSensorPrototype().getOutputFile() != null) {
                             mockSensorJob.setWriterThread(workloadGenerator.getWriterThread());
                             mockSensorJob.setWriteTofFile(true);
-                        }
-                        else
+                        } else
                             mockSensorJob.setWriteTofFile(false);
                         mockSensorJob.setSensorMessageSendService(sensorMessageSendService);
                         mockSensorJobs.add(mockSensorJob);
                     });
-            mockSensorJobs.stream().
-                    forEach(mockSensorJob -> mockSensorJob.start());
-            if(!scenarioList.isEmpty()){
-                scenarioManager = new ScenarioManager(scenarioList, mockSensorJobs);
-            }
-            workloadGenerator.setMockSensorJobs(mockSensorJobs);
-            startedProducing = true;
-//            if(!workloadGenerator.isInitialized())
-//                workloadGenerator.setInitialized(true);
         }catch (Exception exception){
-            if(exception instanceof IOException){
-                errorMessage = "Could not create file for output";
-            }else
-                errorMessage = exception.getMessage();
-//            exchange.setHttpStatus(HTTP_INTERNAL_SERVER_ERROR);
-//            exchange.setProperty(ERROR_MESSAGE_TYPE,UNEXPECTED_ERROR_OCCURRED);
-//            exchange.setProperty(ERROR_MESSAGE,errorMessage);
+            errorMessage = EXCEPTION_CAUGHT_WHILE + "while creating mock Sensor Threads:" + exception.getMessage();
+            log.error(errorMessage, exception);
             throw new Exception(errorMessage);
         }
-    }
-
-    @Override
-    public void pause(Exchange exchange) throws Exception {
-        if(scenarioManager != null)
-            scenarioManager.cancelScenarioJobs();
-        cancelAllMockSensorJobs();
-        if (workloadGenerator.isWriteToOutputFile()) {
-            while (workloadGenerator.getWriterThread().getBlockingDeque().size() != 0) ;
-            workloadGenerator.getWriterThread().pause();
+        try {
+            mockSensorJobs.stream().
+                    forEach(mockSensorJob -> mockSensorJob.start());
+        }catch (Exception exception){
+            errorMessage = EXCEPTION_CAUGHT_WHILE + "while starting mock Sensor Threads:" + exception.getMessage();
+            log.error(errorMessage, exception);
+            throw new Exception(errorMessage);
         }
-        startedProducing = false;
-
-        workloadGenerator.getMockSensorPrototypes().stream()
-                .filter(mockSensorPrototype -> mockSensorPrototype.getEvaluateFieldGenerationRate())
-                .forEach(mockSensorPrototype -> {
-                    List<MockSensorJob> mockSensorJobs = workloadGenerator.getMockSensorJobs().stream()
-                            .filter(mockSensorJob -> mockSensorJob.getMockSensor().getMockSensorPrototype().getSensorPrototypeName().equals(mockSensorPrototype.getSensorPrototypeName()))
-                            .collect(Collectors.toList());
-                    SensorFieldStatistics[] sensorFieldStatistics = mockSensorJobs.get(0).getSensorFieldStatistics();
-                    for(int i =1;i<mockSensorJobs.size();++i){
-                        for(int j=0;j<mockSensorJobs.get(i).getSensorFieldStatistics().length;++j) {
-                            SensorFieldStatistics fieldStatistics = mockSensorJobs.get(i).getSensorFieldStatistics()[j];
-                            SensorUtils.mergeSensorFieldStatistics(sensorFieldStatistics[j], fieldStatistics);
-                        }
-                    }
-                    SensorUtils.exportSensorPrototypes(sensorFieldStatistics, 0,mockSensorPrototype.getSensorPrototypeName(), 0);
-                });
+        return mockSensorJobs;
     }
 
-    @Override
-    public void resume(Exchange exchange) throws Exception {
 
-        if(!workloadGenerator.isStarted()/*&&workloadGenerator.isInitialized()*/&&workloadGenerator.isWriteToOutputFile()) {
-            workloadGenerator.getWriterThread().resume2();
-        }
-
-        workloadGenerator.getMockSensorJobs().parallelStream()
-                .forEach(mockSensorJob -> {
-//                    if (/*!finalInitialized &&*/ finalWriteToOutputFile) {
-//                        mockSensorJob.setWriterThread(workloadGenerator.getWriterThread());
-//                        mockSensorJob.setWriteTofFile(finalWriteToOutputFile);
-//                    }
-                    try {
-                        mockSensorJob.resume2();
-                    } catch (Exception e) {
-                        log.error("SensorJob {"+mockSensorJob.getMockSensor().getId()+ "} could not be resumed due to:"+e.getMessage(), e);
-                    }
-                });
-        workloadGenerator.getMockSensorJobs().stream()
-                .forEach(mockSensorJob -> {
-                    try{
-                        mockSensorJob.resume2();
-                    }catch (Exception exception){}
-                });
-        startedProducing = true;
-    }
-
-    @Override
-    public void terminate(Exchange exchange) throws Exception {
-        terminateWriterThread();
-        //  workloadGenerator.setInitialized(false);
-        clearMockSensorRepository();
-        clearMockSensorPrototypeRepository();
-        workloadGenerator.getMockSensorJobs()
-                .stream().forEach(mockSensorJob -> {
-            try {
-                mockSensorJob.terminate();
-            } catch (Exception e) {
-                log.error("SensorJob {"+mockSensorJob.getMockSensor().getId()+"} could not be terminated successfully");
-            }
-        });
-
-    }
-
-    @Override
-    public boolean isStartedProducing() {
-        return startedProducing;
-    }
 
     public synchronized void terminateWriterThread()throws Exception{
         if(workloadGenerator.isWriteToOutputFile()){

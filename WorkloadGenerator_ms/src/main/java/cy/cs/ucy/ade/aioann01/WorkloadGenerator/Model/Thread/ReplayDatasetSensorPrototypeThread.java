@@ -85,7 +85,7 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
             datasetSensorPrototypeService.createDatasetSensorPrototype(datasetSensorPrototype);
         }catch (Exception exception){
             datasetSensorPrototypeIsCorrectlySet = false;
-            log.error(EXCEPTION_CAUGHT +" while creating datasetSensorPrototype :" +exception.getMessage(),exception);
+            log.error(EXCEPTION_CAUGHT_WHILE +" while creating datasetSensorPrototype :" +exception.getMessage(),exception);
             return;
         }
         File file = datasetSensorPrototypeService.validateFile(

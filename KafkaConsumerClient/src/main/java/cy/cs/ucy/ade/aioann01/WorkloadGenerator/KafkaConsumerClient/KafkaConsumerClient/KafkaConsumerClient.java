@@ -52,7 +52,7 @@ public class KafkaConsumerClient {
     private static final Logger log= LoggerFactory.getLogger(KafkaConsumerClient.class);
 
     public KafkaConsumerClient(String ip,String port){
-        Properties properties= new Properties();
+        Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,ip+":"+port );
         properties.put("group.id", "test");
         properties.put("enable.auto.commit", "true");
