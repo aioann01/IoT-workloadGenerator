@@ -171,12 +171,17 @@ public class WorkloadGeneratorController {
         }
         for(ISensorDataProducerService sensorDataProducerService:workloadGeneratorService.getSensorDataProducerServices())
             if(sensorDataProducerService instanceof ProduceMockSensorDataService) {
-                if (addMockSensorsRequest != null && addMockSensorsRequest.getMockSensorPrototypeName() != null) {
-                    ((ProduceMockSensorDataService) sensorDataProducerService).createMockSensorJobsForMockSensorPrototype(exchange, addMockSensorsRequest.getMockSensorPrototypeName(), addMockSensorsRequest.getQuantity());
-                }else {
+                if (addMockSensorsRequest != null && addMockSensorsRequest.getMockSensorPrototypeName() == null) {
                     exchange.setProperty(ERROR_MESSAGE,"MockSensorPrototype name for the mockSensors has not been provided in the payload");
                     exchange.setProperty(ERROR_MESSAGE_TYPE,VALIDATION_ERROR);
-                    exchange.setHttpStatus(HTTP_BAD_REQUEST);}
+                    exchange.setHttpStatus(HTTP_BAD_REQUEST);
+                }else if (addMockSensorsRequest != null && addMockSensorsRequest.getQuantity() == null){
+                    exchange.setProperty(ERROR_MESSAGE,"Quantity for the mockSensors has not been provided in the payload");
+                    exchange.setProperty(ERROR_MESSAGE_TYPE,VALIDATION_ERROR);
+                    exchange.setHttpStatus(HTTP_BAD_REQUEST);
+                }else{
+                ((ProduceMockSensorDataService) sensorDataProducerService).createMockSensorJobsForMockSensorPrototype(exchange, addMockSensorsRequest.getMockSensorPrototypeName(), addMockSensorsRequest.getQuantity());
+                }
             }else {
                 Utils.setValidationExceptionOnExchange(exchange,"MockSensor Operations are not supported for the provided configs_file.",UNEXPECTED_ERROR_OCCURRED);
             }
@@ -202,7 +207,7 @@ public class WorkloadGeneratorController {
 
 
     @GetMapping("mockSensorPrototypes")
-    public Exchange retrieveMockSensorPrototypes(Exchange exchange,@RequestParam(required = false)  String name){
+    public Exchange retrieveMockSensorPrototypes(Exchange exchange,@RequestParam(required = false)  String mockSensorPrototypeName){
         log.info("Request to {GET mockSensorPrototypes} received");
         if(!workloadGeneratorService.isStarted()){
             Utils.setValidationExceptionOnExchange(exchange,"Workload Generator it isn't working",UNEXPECTED_ERROR_OCCURRED);
@@ -210,9 +215,9 @@ public class WorkloadGeneratorController {
         for(ISensorDataProducerService sensorDataProducerService:workloadGeneratorService.getSensorDataProducerServices())
             if(sensorDataProducerService instanceof ProduceMockSensorDataService) {
 
-                if(name!=null){
-                    log.debug("name query param is present:" +name);
-                    mockSensorPrototypeService.findMockSensorPrototypeByName(exchange,name);
+                if(mockSensorPrototypeName != null){
+                    log.debug("mockSensorPrototypeName query param is present:" +mockSensorPrototypeName);
+                    mockSensorPrototypeService.findMockSensorPrototypeByName(exchange, mockSensorPrototypeName);
                 }
                 else {
                     mockSensorPrototypeService.retrieveAllMockSensorPrototypes(exchange);

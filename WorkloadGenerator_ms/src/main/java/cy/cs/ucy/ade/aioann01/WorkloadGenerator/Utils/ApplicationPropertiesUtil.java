@@ -53,14 +53,12 @@ public class ApplicationPropertiesUtil{
     public void setConfigsDirectory(String configsDirectory) {
         ApplicationPropertiesUtil.configsDirectory = configsDirectory;
         log.debug("Config directory property initialized succesfully: {"+configsDirectory+"}");
-
     }
 
     @Value("${resources.directory}")
     public void setResourcesDirectory(String resourcesDirectory) {
         ApplicationPropertiesUtil.resourcesDirectory = resourcesDirectory;
         log.debug("Resources directory property initialized succesfully: {"+resourcesDirectory+"}");
-
     }
 
     @Value("${sso.service.port}")

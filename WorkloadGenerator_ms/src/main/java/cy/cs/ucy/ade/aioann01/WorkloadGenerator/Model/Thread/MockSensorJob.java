@@ -5,14 +5,11 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.FileRecord;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensor;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorPrototypeOutputFileInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldValueInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorFieldStatistics;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.WriterThread;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.KafkaSensorMessageSendService;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.MqttSensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
 import org.codehaus.jettison.json.JSONObject;
@@ -28,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.UNEXPECTED_ERROR_OCCURRED;
+import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorConstants.ASYNC_MESSAGES;
 
 
 public class MockSensorJob extends Thread{
@@ -44,7 +42,7 @@ public class MockSensorJob extends Thread{
 
     private volatile boolean pause;
 
-    private SimpleDateFormat outputFileSimpleDateFormatter ;
+    private SimpleDateFormat outputFileSimpleDateFormatter;
 
     private static final Logger log = LoggerFactory.getLogger(MockSensor.class);
 
@@ -56,7 +54,17 @@ public class MockSensorJob extends Thread{
 
     private Boolean scenarioMode;
 
+    private Map<String, Object> propertiesMap;
+
     public MockSensorJob(MockSensor mockSensor) {
+        propertiesMap = new HashMap<>();
+        try {
+            Boolean async = Boolean.valueOf(ApplicationPropertiesUtil.readPropertyFromConfigs(ASYNC_MESSAGES));
+            propertiesMap.put(ASYNC_MESSAGES, async);
+        }catch (Exception e){
+            log.warn(ASYNC_MESSAGES + "was not ptovided. Default messages send type will be synchronous");
+            propertiesMap.put(ASYNC_MESSAGES, false);
+        }
         this.stop = false;
         this.pause = false;
         this.scenarioMode = false;
@@ -146,34 +154,30 @@ public class MockSensorJob extends Thread{
     }
 
 
-    public void sendMessage()throws RuntimeException{
+    public void sendMessage()throws RuntimeException {
         String message = SensorUtils.createMessage(mockSensor.getMockSensorPrototype().getMessagePrototype(), this.sensorFieldStatistics, this.mockSensor.getMockSensorPrototype().getEvaluateFieldGenerationRate(), scenarioMode, scenarioFieldValueInfoMap);
-        if(writeTofFile) {
+        if (writeTofFile) {
             logToFile(message);
         }
         SensorMessageEnum contentType = getMockSensor().getMockSensorPrototype().getMessagePrototype().getSensorMessageType();
         String sensorId = getMockSensor().getId();
-        asyncCallToSendMessage(sensorId, message, contentType);
-    }
-
-
-    public void asyncCallToSendMessage(String sensorId, String message, SensorMessageEnum contentType){
-        CompletableFuture.runAsync(() -> {
+        Boolean async = (Boolean) (propertiesMap.get(ASYNC_MESSAGES));
+        //log.trace("Sending message for sensorId {"+sensorId+"}. Message: "+message);
+        if (async) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    sensorMessageSendService.sendMessage(sensorId, message, contentType);
+                } catch (Exception exception) {
+                    log.error("Error while sending sensor message: " + exception.getMessage(), exception);
+                }
+            });
+        } else {
             try {
                 sensorMessageSendService.sendMessage(sensorId, message, contentType);
-
-                //log.trace("Sending message for sensorId {"+sensorId+"}. Message: "+message);
-//                if(sensorMessageSendService instanceof MqttSensorMessageSendService) {
-//                    sensorMessageSendService.sendMessage(getMockSensor().getMockSensorPrototype().getSensorPrototypeName() + "/" + mockSensor.getId(), message, contentType);
-//                }else if(sensorMessageSendService instanceof KafkaSensorMessageSendService){
-//                    sensorMessageSendService.sendMessage(getMockSensor().getMockSensorPrototype().getSensorPrototypeName(), message, contentType);
-//                }
-//                else
-//                    sensorMessageSendService.sendMessage(sensorId, message, contentType);
-            }catch (Exception exception){
-                log.error("Error while sending sensor message: "+exception.getMessage(), exception);
+            } catch (Exception exception) {
+                log.error("Error while sending sensor message: " + exception.getMessage(), exception);
             }
-        });
+        }
     }
 
 

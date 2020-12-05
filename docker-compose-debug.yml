@@ -88,21 +88,22 @@ services:
   
   
   
-  #kafka-subscriber-client-ms:
-  #  build:
-  #    context: .
-  #    dockerfile: KafkaConsumerClient/Dockerfile
-  #  environment:
-  #    - SERVER_PORT=8096
-  #    - logging.level=INFO,DEBUG,ERROR
-  #    - LOGGING_FILE=/home/logs/server.log
-  #    - logging.level.web=DEBUG
-  #  ports:
-  #    - "8096:8096"
-  #    - "8006:8006"
-  #  container_name: kafkaSubscriberClient_ms
-  #  networks:
-  #    - workloadGenerator-network  
+  kafka-subscriber-client-ms:
+    build:
+      context: .
+      dockerfile: KafkaConsumerClient/Dockerfile
+    environment:
+      - SERVER_PORT=8096
+      - logging.level=INFO,DEBUG,ERROR
+      - LOGGING_FILE=/home/logs/server.log
+      - logging.level.web=DEBUG
+      - KAFKA_HOST=kafka
+    ports:
+      - "8096:8096"
+      - "8006:8006"
+    container_name: kafkaSubscriberClient_ms
+    networks:
+      - workloadGenerator-network  
   
     
  # mqtt-broker:
@@ -125,6 +126,31 @@ services:
   #  networks:
   #    - workloadGenerator-network    
   #  container_name: sso_ms
+   
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    container_name: zookeeper
+    networks:
+      - workloadGenerator-network 
+  
+  
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "home:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    container_name: kafka
+    networks:
+      - workloadGenerator-network  
+      
       
 networks:
    workloadGenerator-network:

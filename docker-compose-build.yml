@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+
+   kafka-subscriber-client-ms:
+    build:
+      context: .
+      dockerfile: KafkaConsumerClient/Dockerfile
+    environment:
+      - SERVER_PORT=8096
+      - logging.level=INFO,DEBUG,ERROR
+      - LOGGING_FILE=/home/logs/server.log
+      - logging.level.web=DEBUG
+    ports:
+      - "8096:8096"
+      - "8006:8006"
+    container_name: kafkaSubscriberClient_ms
+    networks:
+      - workloadGenerator-network  
+      
+networks:
+   workloadGenerator-network:
+     driver: bridge     

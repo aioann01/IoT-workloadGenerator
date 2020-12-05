@@ -48,6 +48,8 @@ public class DatasetSensorPrototypeService {
 
     private static final Logger log = LoggerFactory.getLogger(DatasetSensorPrototypeService.class);
 
+    private static JSONObject propertiesJSONObject = new JSONObject();
+
     public ISensorMessageSendService getSensorMessageSendService() {
         return sensorMessageSendService;
     }
@@ -57,6 +59,13 @@ public class DatasetSensorPrototypeService {
     }
 
     public DatasetSensorPrototype createDatasetSensorPrototype(DatasetSensorPrototype datasetSensorPrototype) throws Exception {
+        try {
+            Boolean async = Boolean.valueOf(ApplicationPropertiesUtil.readPropertyFromConfigs(ASYNC_MESSAGES));
+            propertiesJSONObject.put(ASYNC_MESSAGES, async);
+        }catch (Exception e){
+            log.warn(ASYNC_MESSAGES + "was not ptovided. Default messages send type will be synchronous");
+            propertiesJSONObject.put(ASYNC_MESSAGES, false);
+        }
         String errorMessage = null;
         String datasetSensorPrototypeName = datasetSensorPrototype.getSensorPrototypeName();
         if (datasetSensorPrototypeName == null) {
@@ -311,13 +320,22 @@ public class DatasetSensorPrototypeService {
 
 
 
-    public void sendMessage(String sensorId, String message, SensorMessageEnum contentType) throws RuntimeException{
-        CompletableFuture.runAsync(() -> {
+    public void sendMessage(String sensorId, String message, SensorMessageEnum contentType) throws RuntimeException {
+        if (propertiesJSONObject.optBoolean(ASYNC_MESSAGES)) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    sensorMessageSendService.sendMessage(sensorId, message, contentType);
+                } catch (Exception exception) {
+                    log.error("Could not send message " + message + " for sensorId" + sensorId + " due to ", exception.getMessage(), exception);
+                }
+            });
+        } else {
             try {
                 sensorMessageSendService.sendMessage(sensorId, message, contentType);
-            }catch (Exception exception){
-                log.error("Could not send message "+message +" for sensorId"+sensorId+" due to ",exception.getMessage(), exception);
-            }});
+            } catch (Exception exception) {
+                log.error("Could not send message " + message + " for sensorId" + sensorId + " due to ", exception.getMessage(), exception);
+            }
+        }
     }
 
 }

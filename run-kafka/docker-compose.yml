@@ -14,3 +14,10 @@ services:
       KAFKA_CREATE_TOPICS: "home:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      
+      
+networks:
+   workload-generator-ms_workloadGenerator-network:
+     external: true
+   kafka-subscriber-client-ms_workloadGenerator-network:
+     external: true     

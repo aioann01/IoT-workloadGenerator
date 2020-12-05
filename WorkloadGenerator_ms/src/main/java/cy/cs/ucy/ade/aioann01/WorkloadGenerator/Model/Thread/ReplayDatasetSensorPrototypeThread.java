@@ -36,7 +36,7 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
 
     private volatile boolean pause;
 
-    private volatile  boolean finished;
+    private volatile boolean finished;
 
     private int recordsCount = 0;
 

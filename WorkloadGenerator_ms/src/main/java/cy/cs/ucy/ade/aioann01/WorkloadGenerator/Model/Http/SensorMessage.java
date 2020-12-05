@@ -34,7 +34,7 @@ public class SensorMessage {
 
     @Override
     public String toString() {
-        return "SensorMessage{" +
+        return "SensorMessage : {" +
                 "message='" + message + '\'' +
                 ", sensorId='" + sensorId + '\'' +
                 '}';
