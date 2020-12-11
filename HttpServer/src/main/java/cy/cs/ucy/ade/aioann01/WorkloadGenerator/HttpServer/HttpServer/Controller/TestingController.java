@@ -22,7 +22,7 @@ public class TestingController {
     @ExceptionHandler()
     @PostMapping("/testing")
     public ResponseEntity test(@RequestBody String body, @RequestHeader(HttpHeaders.DATE) String date, @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType){
-        log.info(body +"Date:" +date);
+        log.trace("Received message with body:" +body +" at Date:" +date);
         workloadGeneratorPerformanceTestingService.evaluateAccuracy(body, date, contentType);
         return ResponseEntity.ok(new SuccessResponse("Success"));
     }

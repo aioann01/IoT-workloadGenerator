@@ -77,6 +77,11 @@ public class MockSensorJob extends Thread{
             mockSensor.getMockSensorPrototype().setEvaluateFieldGenerationRate(false);
         this.mockSensor = mockSensor;
         this.sensorId = mockSensor.getId();
+        String sensorIdTrimmed[] = sensorId.split("_");
+        String threadName = "";
+        for(int i=0; i<sensorIdTrimmed.length-1; ++i)
+            threadName = threadName +"-"+ sensorIdTrimmed[i].substring(0,2);
+        this.setName(threadName+"-"+sensorIdTrimmed[sensorIdTrimmed.length-1]);
     }
 
     public String getSensorId() {
@@ -196,17 +201,17 @@ public class MockSensorJob extends Thread{
 
     @Override
     public void run() {
-        log.debug("SensorJob {" +mockSensor.getMockSensorPrototype().getSensorPrototypeName() + "_" + mockSensor.getId() + "} started");
+        log.debug("SensorJob {" + this.sensorId + "} started");
         try{
             while (!stop) {
                 if(pause){
                     synchronized (this){
-                        log.debug("SensorJob {" +mockSensor.getMockSensorPrototype().getSensorPrototypeName() + "_" + mockSensor.getId() + "} will pause");
+                        log.debug("SensorJob {" + this.sensorId + "} will pause");
                         wait();
                         pause = false;
                         if(stop == true)
                             break;
-                        log.debug("SensorJob {" +mockSensor.getMockSensorPrototype().getSensorPrototypeName() + "_" + mockSensor.getId() + "} will woke up and will resume");
+                        log.debug("SensorJob {" + this.sensorId + "} will woke up and will resume");
                     }
                 }
                 try {//Send Message
@@ -225,10 +230,10 @@ public class MockSensorJob extends Thread{
                     log.error("Could not calculate generation rate for sensor:" + mockSensor.getMockSensorPrototype().getSensorPrototypeName(), e);
                 }
             }
-            log.debug("SensorJob {" +mockSensor.getMockSensorPrototype().getSensorPrototypeName() + "_" + mockSensor.getId() + "} has been successfully terminated");
+            log.debug("SensorJob {" + this.sensorId + "} has been successfully terminated");
 
         }catch (Throwable throwable){
-            log.error(UNEXPECTED_ERROR_OCCURRED +" in inside SensorJob {" +mockSensor.getMockSensorPrototype().getSensorPrototypeName() + "_" + mockSensor.getId() + "} run()" + throwable.getMessage());
+            log.error(UNEXPECTED_ERROR_OCCURRED +" in inside SensorJob {"  + this.sensorId+ "} run()" + throwable.getMessage());
             throw new RuntimeException(throwable.getMessage());
         }}
 

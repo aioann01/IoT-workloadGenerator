@@ -45,20 +45,22 @@ public class WorkloadGeneratorController {
 
     @PostMapping("/workloadGenerator/start")
     public Exchange startWorkloadGenerator(Exchange exchange, @RequestParam(value = "delay", required = false) Integer delay) {
-        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
-                OperatingSystemMXBean.class);
-// What % CPU load this current JVM is taking, from 0.0-1.0
-        System.out.println("*******CPUload: "+osBean.getProcessCpuLoad()+"******");
-
-// What % load the overall system is at, from 0.0-1.0
-        System.out.println("*******CPUload: "+osBean.getSystemCpuLoad()+"******");
-        System.out.println("*******Threads: "+Thread.getAllStackTraces().keySet().size()+"******");
-        int nbRunning = 0;
-        for (Thread t : Thread.getAllStackTraces().keySet()) {
-            if (t.getState()==Thread.State.RUNNABLE) nbRunning++;
-        }
-        System.out.println("*******NBUThreads: "+nbRunning);
-
+//        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(
+//                OperatingSystemMXBean.class);
+//// What % CPU load this current JVM is taking, from 0.0-1.0
+//        System.out.println("*******CPUload: "+osBean.getProcessCpuLoad()+"******");
+//
+//// What % load the overall system is at, from 0.0-1.0
+//        System.out.println("*******CPUload: "+osBean.getSystemCpuLoad()+"******");
+//        System.out.println("*******Threads: "+Thread.getAllStackTraces().keySet().size()+"******");
+//        int nbRunning = 0;
+//        for (Thread t : Thread.getAllStackTraces().keySet()) {
+//            if (t.getState()==Thread.State.RUNNABLE) nbRunning++;
+//        }
+//        System.out.println("*******NBUThreads: "+nbRunning);
+int availableMachineCores = Runtime.getRuntime().availableProcessors();
+long machineMemory = Runtime.getRuntime().maxMemory();
+        System.out.println("*******Machine stats******\n" + "Available Machine cores = "+ availableMachineCores+"\n" + "Machine Max memory = "+machineMemory+"\n");
 
         String errorMessage = null;
         if (!workloadGeneratorService.isStarted()) {

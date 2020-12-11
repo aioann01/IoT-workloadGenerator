@@ -157,10 +157,10 @@ public class WorkloadGeneratorAccuracyPerformanceThread extends Thread {
 //                                        expectedMaxMessageELapseTime =  (Integer)((RandomGenerationRate) sensorPrototypeExpectedGenerationRate).getMaxValue();
 //                                    }
                                     int elapsedSensorMessagesTime = (int) ((processedMessage.getDate().getTime() - previousDate.getTime() )/MILISECONDS_TO_SECONDS);
-                                    log.info("For sensorId {"+sensorId+"} previous Date:"+previousDate +" currentDate:"+processedMessage.getDate()+ "elapsedSensorMessagesTime: "+elapsedSensorMessagesTime);
+                                    log.trace("For sensorId {"+sensorId+"} previous Date:"+previousDate +" currentDate:"+processedMessage.getDate()+ "elapsedSensorMessagesTime: "+elapsedSensorMessagesTime);
                                     sensorMetrics.setSensorsMessagesCount(sensorMetrics.getSensorsMessagesCount() + 1);
                                     if( elapsedSensorMessagesTime > expectedMaxMessageELapseTime){
-                                        sensorMetrics.setSensorsMessagesDelaySum(sensorMetrics.getSensorsMessagesDelaySum() + elapsedSensorMessagesTime);
+                                        sensorMetrics.setSensorsMessagesDelaySum(sensorMetrics.getSensorsMessagesDelaySum() + (elapsedSensorMessagesTime - expectedMaxMessageELapseTime ));
                                     }
 
                                 }
