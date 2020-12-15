@@ -9,7 +9,7 @@ public class Distribution<T> {
 
     private Number maxValue;
 
-    private Boolean value;
+    private Object value;
 
     private Double probability;
 
@@ -50,11 +50,11 @@ public class Distribution<T> {
         this.probability = probability;
     }
 
-    public Boolean getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(Boolean value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 }

@@ -33,8 +33,8 @@ public class GenerationRatesUtils {
         DistributionGenerationRate updatedDistributionGenerationRate = (DistributionGenerationRate)generationRateValue;
         double probabilitySum = 0;
         for(Distribution distribution: updatedDistributionGenerationRate.getDistributions()) {
-            if(type.equals(BOOLEAN)){
-                if(distribution.getValue() == null || !validateValueType(type,distribution.getValue()))
+            if(distribution.getValue() != null){
+                if(distribution.getValue() == null || !validateValueType(type, distribution.getValue()))
                     return null;
             }
             else{
@@ -96,21 +96,27 @@ public class GenerationRatesUtils {
         double rnd = rand.nextDouble();
         double maxProbability = 1;
         for(Distribution distribution: ((DistributionGenerationRate)generationRateValue).getDistributions()){
-            if(rnd >= maxProbability - distribution.getProbability())
-            { if(type.equals(BOOLEAN))
-                return (T)distribution.getValue();
-            else if(type.equals(INTEGER)){
-                Integer value;
-                value = (Integer) distribution.getMinValue() +  rand.nextInt(((Integer) distribution.getMaxValue() - (Integer) distribution.getMinValue()))+1;
-                return castValue(value,type);
+            if(rnd >= maxProbability - distribution.getProbability()){
+                if(distribution.getValue() != null){
+                   // if(type.equals(BOOLEAN))
+                        return (T)distribution.getValue();
+                }
+                else {
+                    if(type.equals(INTEGER)){
+                        Integer value;
+                        value = (Integer) distribution.getMinValue() +  rand.nextInt(((Integer) distribution.getMaxValue() - (Integer) distribution.getMinValue())) +1;
+                        return castValue(value, type);
+                    }
+                    else{
+                        double value;
+                        value = (Double)distribution.getMinValue() + ((Double)distribution.getMaxValue() - (Double)distribution.getMinValue()) * rand.nextDouble();
+                        DecimalFormat df = new DecimalFormat("#.##");
+                        value  = Double.parseDouble(df.format(value));
+                        return castValue(value, type);
+                    }
+                }
             }
-            else{double value;
-                value = (Double)distribution.getMinValue()+((Double)distribution.getMaxValue()-(Double)distribution.getMinValue())*rand.nextDouble();
-                DecimalFormat df = new DecimalFormat("#.##");
-                value  = Double.parseDouble(df.format(value));
-                return castValue(value,type);}
-            }
-            else  maxProbability-=distribution.getProbability();
+            else maxProbability -= distribution.getProbability();
         }
         return  null;
     }
