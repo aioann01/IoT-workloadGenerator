@@ -1,4 +1,4 @@
-package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services;
+package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
 
