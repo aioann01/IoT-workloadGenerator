@@ -10,13 +10,13 @@ public interface IMockSensorPrototypeRepository {
 
     List<MockSensorPrototype> getAllMockSensorPrototypes();
 
-    boolean deleteMockSensorPrototype(String mockSensorProtoypeName);
+    boolean deleteMockSensorPrototype(String mockSensorPrototypeName);
 
     void addMockSensorPrototype(MockSensorPrototype mockSensorPrototype);
 
     void addAllMockSensorPrototypes(List<MockSensorPrototype> mockSensorPrototypes);
 
-    void updateMockSensorPrototype(String mockSensorPrototypeName,MockSensorPrototype updatedMockSensorPrototype);
+    void updateMockSensorPrototype(String mockSensorPrototypeName, MockSensorPrototype updatedMockSensorPrototype);
 
     void deleteAll();
 

@@ -1,6 +1,6 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Repository;
 
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensor;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors.MockSensor;
 import java.util.List;
 
 public interface IMockSensorRepository {

@@ -11,18 +11,19 @@ import java.util.Optional;
 public class MockSensorPrototypeRepository implements IMockSensorPrototypeRepository {
 
 
-    List<MockSensorPrototype> mockSensorPrototypes=new ArrayList<>();
+    List<MockSensorPrototype> mockSensorPrototypes = new ArrayList<>();
 
 
     @Override
     public MockSensorPrototype getMockSensorPrototypeByMockSensorPrototypeName(String mockSensorPrototypeName) {
-        Optional<MockSensorPrototype> mockSensorPrototypeOptional=  mockSensorPrototypes
+        Optional<MockSensorPrototype> mockSensorPrototypeOptional =  mockSensorPrototypes
                 .stream()
                 .filter(mockSensorPrototype -> mockSensorPrototype.getSensorPrototypeName().equals(mockSensorPrototypeName))
                 .findFirst();
         if(mockSensorPrototypeOptional.isPresent())
             return mockSensorPrototypeOptional.get();
-        else return null;
+        else
+            return null;
     }
 
 
@@ -33,14 +34,15 @@ public class MockSensorPrototypeRepository implements IMockSensorPrototypeReposi
 
 
     @Override
-    public boolean deleteMockSensorPrototype(String mockSensorProtoypeName) {
-        ListIterator<MockSensorPrototype> mockSensorPrototypeListIterator=mockSensorPrototypes.listIterator();
+    public boolean deleteMockSensorPrototype(String mockSensorPrototypeName){
+        ListIterator<MockSensorPrototype> mockSensorPrototypeListIterator = mockSensorPrototypes.listIterator();
         while(mockSensorPrototypeListIterator.hasNext())
-            if(mockSensorPrototypeListIterator.next().getSensorPrototypeName().equals(mockSensorProtoypeName)){
-                mockSensorPrototypeListIterator.remove();;
+            if(mockSensorPrototypeListIterator.next().getSensorPrototypeName().equals(mockSensorPrototypeName)){
+                mockSensorPrototypeListIterator.remove();
                 return true;
             }
-        return false;}
+        return false;
+    }
 
 
     @Override
@@ -54,6 +56,7 @@ public class MockSensorPrototypeRepository implements IMockSensorPrototypeReposi
         this.mockSensorPrototypes.addAll(mockSensorPrototypes);
     }
 
+
     @Override
     public void deleteAll(){
         ListIterator<MockSensorPrototype> mockSensorPrototypeListIterator = mockSensorPrototypes.listIterator();
@@ -63,12 +66,13 @@ public class MockSensorPrototypeRepository implements IMockSensorPrototypeReposi
         }
     }
 
-@Override
-    public void updateMockSensorPrototype(String mockSensorPrototypeName,MockSensorPrototype updatedMockSensorPrototype){
-       for(int i=0;i<mockSensorPrototypes.size();++i)
-           if(mockSensorPrototypes.get(i).getSensorPrototypeName().equals(mockSensorPrototypeName)){
-               mockSensorPrototypes.set(i,updatedMockSensorPrototype);
-               break;
-           }
+
+    @Override
+    public void updateMockSensorPrototype(String mockSensorPrototypeName, MockSensorPrototype updatedMockSensorPrototype){
+        for(int i = 0; i < mockSensorPrototypes.size(); ++ i)
+            if(mockSensorPrototypes.get(i).getSensorPrototypeName().equals(mockSensorPrototypeName)){
+                mockSensorPrototypes.set(i, updatedMockSensorPrototype);
+                break;
+            }
     }
 }
