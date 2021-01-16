@@ -6,6 +6,8 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.FieldPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorFieldStatistics;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorDataProducerService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServices.ProduceMockSensorDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -48,7 +52,7 @@ public class Utils<T> {
 //            log.error("Could not find {configs.directory} property in application.properties. Please provide the property for the system to know from where to retrieve configs files", exception);
 //        }
 
-  //  }
+    //  }
 
 //    //Application.properties
 //    public static String readApplicationProperty(String propertyName) throws Exception {
@@ -106,6 +110,13 @@ public class Utils<T> {
 //        }
 //
 //    }
+
+    public static Optional<ProduceMockSensorDataService> findProducerMockSensorDataServiceFromExistingISensorDataProducerServices(List<ISensorDataProducerService> sensorDataProducerServices){
+        return sensorDataProducerServices.stream()
+                .filter(iSensorDataProducerService -> iSensorDataProducerService instanceof ProduceMockSensorDataService)
+                .map(iSensorDataProducerService -> (ProduceMockSensorDataService)iSensorDataProducerService)
+                .findAny();
+    }
 
 
     public static void setExchangeFromHttpClientErrorException(Exchange exchange, HttpClientErrorException httpClientErrorException) {
@@ -169,7 +180,7 @@ public class Utils<T> {
 
     ;
 
-    public static void setValidationExceptionOnExchange(Exchange exchange, String errorMessage, String errorMessageType) {
+    public static void setValidationErrorOnExchange(Exchange exchange, String errorMessage, String errorMessageType) {
         exchange.setProperty(ERROR_MESSAGE, errorMessage);
         exchange.setProperty(ERROR_MESSAGE_TYPE, errorMessageType == null
                 ? VALIDATION_ERROR
@@ -178,7 +189,14 @@ public class Utils<T> {
         exchange.setProperty(EXCEPTION_IS_SET, true);
     }
 
-    ;
+    public static void setNotFoundErrorOnExchange(Exchange exchange, String errorMessage, String errorMessageType) {
+        exchange.setProperty(ERROR_MESSAGE, errorMessage);
+        exchange.setProperty(ERROR_MESSAGE_TYPE, errorMessageType == null
+                ? VALIDATION_ERROR
+                : errorMessageType);
+        exchange.setHttpStatus(HTTP_NOT_FOUND);
+        exchange.setProperty(EXCEPTION_IS_SET, true);
+    }
 
 
     public static void setInternalServerErrorOnExchange(Exchange exchange, String errorMessage, String errorMessageType) {
@@ -192,6 +210,12 @@ public class Utils<T> {
 
     ;
 
+    public static void printHostedMachineStats(){
+        int availableMachineCores = Runtime.getRuntime().availableProcessors();
+        long machineMemory = Runtime.getRuntime().maxMemory();
+        log.debug("*******Machine stats******\n" + "Available Machine cores = "+ availableMachineCores+"\n" + "Machine Max memory = "+machineMemory+"\n");
+
+    }
 
     public static boolean isStringDouble(String str) {
         if (str.matches("-?\\d+(\\.?\\d+)?"))
