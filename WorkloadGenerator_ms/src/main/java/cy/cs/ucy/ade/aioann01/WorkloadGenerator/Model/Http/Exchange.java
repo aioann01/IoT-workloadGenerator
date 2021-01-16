@@ -33,6 +33,7 @@ public class Exchange<T> {
     public void addHeader(String name, Object value){
         headers.put(name,value);
     }
+
     public void removeHeader(String name){
         headers.remove(name);
     }
@@ -41,9 +42,10 @@ public class Exchange<T> {
         properties.put(name,value);
     }
     public Object getProperty(String name){
-        return properties.get(name);}
+        return properties.get(name);
+    }
 
-    public T getProperty(String name,T type) {
+    public T getProperty(String name, T type) {
         try {
             return (T) properties.get(name);
         }catch (Exception e){

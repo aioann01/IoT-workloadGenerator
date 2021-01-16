@@ -5,9 +5,9 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.ReplayDatasetSensorPrototypeThread;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.WorkloadGenerator;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.DatasetSensorPrototypeService;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorDataProducerService;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ReplayDataFromDatasetServices.DatasetSensorPrototypeService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorDataProducerService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

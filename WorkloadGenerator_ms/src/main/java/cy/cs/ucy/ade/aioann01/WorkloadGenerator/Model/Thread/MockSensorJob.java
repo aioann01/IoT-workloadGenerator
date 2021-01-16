@@ -4,15 +4,14 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.FileRecord;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensor;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors.MockSensor;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldValueInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorFieldStatistics;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,11 +76,12 @@ public class MockSensorJob extends Thread{
             mockSensor.getMockSensorPrototype().setEvaluateFieldGenerationRate(false);
         this.mockSensor = mockSensor;
         this.sensorId = mockSensor.getId();
-        String sensorIdTrimmed[] = sensorId.split("_");
-        String threadName = "";
-        for(int i=0; i<sensorIdTrimmed.length-1; ++i)
-            threadName = threadName +"-"+ sensorIdTrimmed[i].substring(0,2);
-        this.setName(threadName+"-"+sensorIdTrimmed[sensorIdTrimmed.length-1]);
+//        String sensorIdTrimmed[] = sensorId.split("_");
+//        String threadName = "";
+//        for(int i=0; i<sensorIdTrimmed.length-1; ++i)
+//            threadName = threadName +"-"+ sensorIdTrimmed[i].substring(0,2);
+//        this.setName(threadName+"-"+sensorIdTrimmed[sensorIdTrimmed.length-1]);
+        this.setName(sensorId);
     }
 
     public String getSensorId() {

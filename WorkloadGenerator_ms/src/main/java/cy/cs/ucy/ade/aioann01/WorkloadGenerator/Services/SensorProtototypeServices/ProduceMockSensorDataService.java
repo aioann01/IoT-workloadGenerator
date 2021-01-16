@@ -1,30 +1,27 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServices;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.GenerationRate.GenerationRateWrapper;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensor;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors.MockSensor;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldValueInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioManager;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.MockSensorJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensorPrototypeJob;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors.MockSensorPrototypeJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.WriterThread;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorDataProducerService;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorDataProducerService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorPrototypeService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorService;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -92,7 +89,7 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
         mockSensorPrototypes = mockSensorPrototypeJobs.stream()
                 .map(mockSensorPrototypeJob -> mockSensorPrototypeJob.getMockSensorPrototype())
                 .collect(Collectors.toList());
-        mockSensorPrototypeService.addAllMockSensorPrototype(mockSensorPrototypes);
+        mockSensorPrototypeService.addAllMockSensorPrototypes(mockSensorPrototypes);
         workloadGenerator.setMockSensorPrototypeJobs(mockSensorPrototypeJobs);
         Integer delay = (Integer)exchange.getProperty(DELAY);
         if(delay == null)
@@ -542,7 +539,7 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
             exchange.setHttpStatus(HTTP_NOT_FOUND);
             return;
         }
-        mockSensorService.deleteMockSensorsOfMockSensorPorotype(mockSensorPrototypeName);
+        mockSensorService.deleteMockSensorsOfMockSensorPrototype(mockSensorPrototypeName);
         mockSensorPrototypeService.deleteMockSensorPrototype(mockSensorPrototypeName);
         ListIterator<MockSensorJob> mockSensorJobListIterator = workloadGenerator.getMockSensorJobs().listIterator();
         while (mockSensorJobListIterator.hasNext()) {

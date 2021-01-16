@@ -21,6 +21,7 @@ public class ConstantGenerationRate extends GenerationRate {
     public ConstantGenerationRate(Object value){
         this.value = value;
     }
+
     public ConstantGenerationRate(){}
 
 

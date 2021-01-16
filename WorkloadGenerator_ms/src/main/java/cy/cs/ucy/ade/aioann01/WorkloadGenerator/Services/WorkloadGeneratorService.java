@@ -10,8 +10,12 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorDataProducerService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.IWorkloadGeneratorService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorPrototypeService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ReplayDataFromDatasetServices.DatasetSensorPrototypeService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.HttpSensorMessageRequestService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.KafkaSensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.MqttSensorMessageSendService;
@@ -31,12 +35,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.*;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorConstants.*;
 
 @Service
-public class WorkloadGeneratorService implements IWorkloadGeneratorService{
+public class WorkloadGeneratorService implements IWorkloadGeneratorService {
 
     @Autowired
     public WorkloadGenerator workloadGenerator;
@@ -315,6 +320,9 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService{
                 readConfigs(exchange);
                 processOutputProtocolConfigurationsAndEstablishConnections(exchange);
                 readSensorDataConfigs(exchange);
+                Object delay = exchange.getProperty(DELAY, Integer.class);
+                if(delay != null)
+                    TimeUnit.SECONDS.sleep(((Integer) delay).intValue());
                 start(exchange);
             } catch (Exception exception) {
                 log.error(UNEXPECTED_EXCEPTION_CAUGHT + "while trying to start workloadGenerator" + exception.getMessage());

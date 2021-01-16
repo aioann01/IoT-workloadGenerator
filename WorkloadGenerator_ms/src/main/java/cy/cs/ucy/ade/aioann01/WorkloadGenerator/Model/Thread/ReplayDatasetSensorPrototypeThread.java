@@ -1,11 +1,9 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread;
 
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorFieldStatistics;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSensorPrototype;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.DatasetSensorPrototypeService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ReplayDataFromDatasetServices.DatasetSensorPrototypeService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

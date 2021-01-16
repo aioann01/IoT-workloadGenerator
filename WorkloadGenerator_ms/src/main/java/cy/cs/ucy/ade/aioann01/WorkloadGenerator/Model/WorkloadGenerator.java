@@ -3,16 +3,13 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.MockSensorJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData.MockSensorPrototypeJob;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors.MockSensorPrototypeJob;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread.WriterThread;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 @Component
 public class WorkloadGenerator {

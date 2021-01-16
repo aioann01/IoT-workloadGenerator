@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Server;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.codehaus.jettison.json.JSONArray;
@@ -61,8 +61,10 @@ public class KafkaSensorMessageSendService implements ISensorMessageSendService 
         String errorMessage = "";
         if (protocolConfigs.optString(TOPIC) != null) {
             this.rootTopic = protocolConfigs.optString(TOPIC);
-        } else
-            log.warn("No root topic was provided. Default root topic is none");
+        } else{
+            errorMessage = "No root topic was provided in protocolConfigs";
+            throw new ValidationException(errorMessage);
+        }
         if (protocolConfigs.has(KAFKA_BROKER_CLUSTERS)) {
             try {
                 JSONArray kafkaBrokersJsonArray = protocolConfigs.getJSONArray(KAFKA_BROKER_CLUSTERS);
@@ -106,32 +108,31 @@ public class KafkaSensorMessageSendService implements ISensorMessageSendService 
         for (int i = 0; i < kafkaProducerClients.size(); ++i) {
             Producer kafkaProducerClient = kafkaProducerClients.get(0);
             try {
-                log.debug("Sending request to Kafka broker {" + kafkaBrokers.get(i).getServerIp() + " for sensor {" + sensorId + "} :" + message);
-
+                // log.debug("Sending request to Kafka broker {" + kafkaBrokers.get(i).getServerIp() + " for sensor {" + sensorId + "} :" + message);
                 final Boolean messageSuccesffullySent = false;
-                if (rootTopic == null) {
-                    kafkaProducerClient.send(new ProducerRecord<String, String>(TOPIC_NAME,
-                            sensorId, message), new Callback() {
-                        public void onCompletion(RecordMetadata metadata, Exception e) {
-                            if (e != null) {
-                                log.error("Exception caught while sending request to KAFKA broker :" + "for sensor {" + sensorId + "+} :" + e.getMessage(), e);
-                            } else {
-                                log.debug("Message was succesfully sent to MQTT broker");
-                            }
+                kafkaProducerClient.send(new ProducerRecord<String, String>(this.rootTopic,
+                        sensorId, message), new Callback() {
+                    public void onCompletion(RecordMetadata metadata, Exception e) {
+                        if (e != null) {
+                            log.error("Exception caught while sending request to KAFKA broker :" + "for sensor {" + sensorId + "+} :" + e.getMessage(), e);
+                        } else {
+                            //log.debug("Message was succesfully sent to MQTT broker");
                         }
-                    });
-                } else {
-                    kafkaProducerClient.send(new ProducerRecord<String, String>(TOPIC_NAME,
-                            rootTopic + "/" + sensorId, message), new Callback() {
-                        public void onCompletion(RecordMetadata metadata, Exception e) {
-                            if (e != null) {
-                                log.error("Exception caught while sending request to KAFKA broker :" + "for sensor {" + sensorId + "+} :" + e.getMessage(), e);
-                            } else {
-                                log.debug("Message was succesfully sent to MQTT broker");
-                            }
-                        }
-                    });
-                }
+                    }
+                });
+
+//                else {
+//                    kafkaProducerClient.send(new ProducerRecord<String, String>(this.rootTopic,
+//                            rootTopic + "/" + sensorId, message), new Callback() {
+//                        public void onCompletion(RecordMetadata metadata, Exception e) {
+//                            if (e != null) {
+//                                log.error("Exception caught while sending request to KAFKA broker :" + "for sensor {" + sensorId + "+} :" + e.getMessage(), e);
+//                            } else {
+//                                log.debug("Message was succesfully sent to MQTT broker");
+//                            }
+//                        }
+//                    });
+//                }
             } catch (Exception e) {
                 log.error("Exception caught while sending request to KAFKA broker :" + this.properties.getProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG) + "for sensor {" + sensorId + "+} :" + e.getMessage(), e);
                 throw new Exception("Could not send message to KAFKA broker due to:" + e.getMessage());

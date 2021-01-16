@@ -8,7 +8,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.SensorMessage;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Server;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ISensorMessageSendService;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
