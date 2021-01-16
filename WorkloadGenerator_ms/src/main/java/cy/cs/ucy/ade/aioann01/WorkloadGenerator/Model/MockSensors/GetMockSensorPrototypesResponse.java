@@ -1,4 +1,4 @@
-package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorData;
+package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 
