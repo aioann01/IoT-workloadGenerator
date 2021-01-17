@@ -22,10 +22,8 @@ public class FieldValuePrototype<T> implements Serializable {
         this.type = type;
         this.value = value;
         this.unit = unit;
-        this.valueRange=valueRange;
+        this.valueRange = valueRange;
     }
-    //public FieldValue(){}
-
 
     public T getValueRange() {
         return valueRange;

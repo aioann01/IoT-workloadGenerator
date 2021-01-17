@@ -1,6 +1,7 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http;
 
 public class ResponseMessage {
+
     private String message;
 
     public ResponseMessage(String message) {

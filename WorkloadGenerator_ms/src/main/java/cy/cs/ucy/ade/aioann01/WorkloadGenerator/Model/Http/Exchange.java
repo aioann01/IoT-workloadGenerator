@@ -41,6 +41,7 @@ public class Exchange<T> {
     public void setProperty(String name,Object value){
         properties.put(name,value);
     }
+
     public Object getProperty(String name){
         return properties.get(name);
     }

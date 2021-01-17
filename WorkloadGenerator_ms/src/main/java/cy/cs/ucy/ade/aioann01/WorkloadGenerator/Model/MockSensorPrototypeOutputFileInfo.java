@@ -9,7 +9,7 @@ public class MockSensorPrototypeOutputFileInfo {
 
     private  String filename;
 
-    private String messageFieldsSeperator;
+    private String messageFieldsSeparator;
 
     private OutputFileEnum outputFileEnum;
 
@@ -51,12 +51,12 @@ public class MockSensorPrototypeOutputFileInfo {
         this.filename = filename;
     }
 
-    public String getMessageFieldsSeperator() {
-        return messageFieldsSeperator;
+    public String getMessageFieldsSeparator() {
+        return messageFieldsSeparator;
     }
 
-    public void setMessageFieldsSeperator(String messageFieldsSeperator) {
-        this.messageFieldsSeperator = messageFieldsSeperator;
+    public void setMessageFieldsSeparator(String messageFieldsSeparator) {
+        this.messageFieldsSeparator = messageFieldsSeparator;
     }
 
     public OutputFileEnum getOutputFileEnum() {

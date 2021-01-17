@@ -1,7 +1,6 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.GenerationRateEnum;
 
 import java.util.List;
 

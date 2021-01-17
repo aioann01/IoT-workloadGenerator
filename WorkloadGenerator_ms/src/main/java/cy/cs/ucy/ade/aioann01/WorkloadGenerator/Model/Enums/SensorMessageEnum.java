@@ -8,7 +8,7 @@ public enum SensorMessageEnum {
     TEXT("txt");
 
 
-    public final  String value;
+    public final String value;
 
     SensorMessageEnum(String value){
         this.value = value;

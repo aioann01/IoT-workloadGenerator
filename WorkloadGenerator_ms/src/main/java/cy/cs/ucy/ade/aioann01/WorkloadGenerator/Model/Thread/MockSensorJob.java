@@ -61,7 +61,7 @@ public class MockSensorJob extends Thread{
             Boolean async = Boolean.valueOf(ApplicationPropertiesUtil.readPropertyFromConfigs(ASYNC_MESSAGES));
             propertiesMap.put(ASYNC_MESSAGES, async);
         }catch (Exception e){
-            log.warn(ASYNC_MESSAGES + "was not ptovided. Default messages send type will be synchronous");
+            log.warn(ASYNC_MESSAGES + "was not provided. Default messages send type will be synchronous");
             propertiesMap.put(ASYNC_MESSAGES, false);
         }
         this.stop = false;
@@ -76,11 +76,6 @@ public class MockSensorJob extends Thread{
             mockSensor.getMockSensorPrototype().setEvaluateFieldGenerationRate(false);
         this.mockSensor = mockSensor;
         this.sensorId = mockSensor.getId();
-//        String sensorIdTrimmed[] = sensorId.split("_");
-//        String threadName = "";
-//        for(int i=0; i<sensorIdTrimmed.length-1; ++i)
-//            threadName = threadName +"-"+ sensorIdTrimmed[i].substring(0,2);
-//        this.setName(threadName+"-"+sensorIdTrimmed[sensorIdTrimmed.length-1]);
         this.setName(sensorId);
     }
 
@@ -147,7 +142,6 @@ public class MockSensorJob extends Thread{
         this.stop = true;
         if(this.pause == true)
             this.notify();
-
     }
 
     public synchronized  void pause() throws IOException,InterruptedException {
@@ -157,8 +151,7 @@ public class MockSensorJob extends Thread{
     public synchronized void resume2() throws InterruptedException, IOException {
         this.notify();
     }
-
-
+    
     public void sendMessage()throws RuntimeException {
         String message = SensorUtils.createMessage(mockSensor.getMockSensorPrototype().getMessagePrototype(), this.sensorFieldStatistics, this.mockSensor.getMockSensorPrototype().getEvaluateFieldGenerationRate(), scenarioMode, scenarioFieldValueInfoMap);
         if (writeTofFile) {

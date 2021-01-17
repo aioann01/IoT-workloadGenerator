@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MockSensorPrototypeJob {
+
     private String mockSensorPrototypeName;
 
     private MockSensorPrototype mockSensorPrototype;
@@ -56,21 +57,6 @@ public class MockSensorPrototypeJob {
     public void setCounter(AtomicInteger counter) {
         this.counter = counter;
     }
-//    public int getCounter() {
-//        return counter;
-//    }
-//
-//    public void setCounter(int counter) {
-//        this.counter = counter;
-//    }
-//
-//    public int getSensorsNumber() {
-//        return sensorsNumber;
-//    }
-//
-//    public void setSensorsNumber(int sensorsNumber) {
-//        this.sensorsNumber = sensorsNumber;
-//    }
 
     public  List<MockSensor> createMockSensors() {
         List<MockSensor> mockSensors = new LinkedList<>();

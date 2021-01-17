@@ -6,6 +6,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RandomGenerationRate<T> extends GenerationRate{
+
     private Number minValue;
 
     private Number maxValue;

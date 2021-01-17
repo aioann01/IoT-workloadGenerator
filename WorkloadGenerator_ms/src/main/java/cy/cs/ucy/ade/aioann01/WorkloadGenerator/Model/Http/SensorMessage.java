@@ -1,13 +1,10 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http;
 
-import java.util.Date;
-
 public class SensorMessage {
 
     private String message;
 
     private String sensorId;
-
 
     public SensorMessage() {}
 

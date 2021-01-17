@@ -6,6 +6,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FieldPrototype<T> {
+
     private String name;
 
     private T value;
@@ -38,6 +39,7 @@ public class FieldPrototype<T> {
         copy.setUnit(unit);
         return copy;
     }
+
     public TypesEnum getTypeEnum() {
         return typeEnum;
     }

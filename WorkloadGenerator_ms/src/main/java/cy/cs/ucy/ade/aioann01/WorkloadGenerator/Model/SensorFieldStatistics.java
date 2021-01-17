@@ -42,15 +42,14 @@ public class SensorFieldStatistics {
         this.samplesCount = 0;;
     }
 
-
     public String toCSVRecordString(){
-        return fieldName+","
-                +type+","
-                +(type.equals(TypesEnum.INTEGER)|| type.equals(TypesEnum.DOUBLE)?sum:"")+","
-                +(type.equals(TypesEnum.INTEGER)|| type.equals(TypesEnum.DOUBLE)?minValue:"")+","
-                +(type.equals(TypesEnum.INTEGER)|| type.equals(TypesEnum.DOUBLE)?maxValue:"")+","
-                +(type.equals(TypesEnum.BOOLEAN)?trueCount:"")+","
-                +(type.equals(TypesEnum.BOOLEAN)?falseCount:"")+"";
+        return fieldName + ","
+                + type + ","
+                + (type.equals(TypesEnum.INTEGER) || type.equals(TypesEnum.DOUBLE) ? sum : "" ) + ","
+                + (type.equals(TypesEnum.INTEGER) || type.equals(TypesEnum.DOUBLE) ? minValue : "" ) + ","
+                + (type.equals(TypesEnum.INTEGER) || type.equals(TypesEnum.DOUBLE) ? maxValue : "" ) + ","
+                + (type.equals(TypesEnum.BOOLEAN) ? trueCount : "" ) + ","
+                + (type.equals(TypesEnum.BOOLEAN) ? falseCount : "" ) + "";
     }
 
     public String getFieldName() {

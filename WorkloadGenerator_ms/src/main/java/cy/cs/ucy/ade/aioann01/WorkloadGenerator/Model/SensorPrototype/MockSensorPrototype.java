@@ -2,7 +2,6 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.SensorPrototype;
 
 import java.util.List;
 

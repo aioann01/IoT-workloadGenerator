@@ -24,7 +24,6 @@ public enum OutputProtocolEnum {
         this.value = value;
     }
 
-
     public String getValue() {
         return value.toLowerCase();
     }
@@ -35,8 +34,6 @@ public enum OutputProtocolEnum {
 
     public static String getSupportedProtocols(){
         return "["+ StringUtils.join(getNames(OutputProtocolEnum.class),',') +"]";
-
-
     }
 
     public static List<String> getNames(Class<? extends Enum<?>> e) {

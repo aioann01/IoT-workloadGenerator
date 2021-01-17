@@ -1,6 +1,5 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 

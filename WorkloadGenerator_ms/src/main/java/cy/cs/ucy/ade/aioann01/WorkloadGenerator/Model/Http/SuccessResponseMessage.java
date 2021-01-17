@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"status","message"})
 public class SuccessResponseMessage extends ResponseMessage{
-    private String status="Success";
+
+    private String status = "Success";
 
     public String getStatus() {
         return status;

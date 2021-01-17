@@ -1,27 +1,14 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Thread;
 
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputFileEnum;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.FieldPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.FileRecord;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensorPrototypeOutputFileInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -67,10 +54,10 @@ public class WriterThread extends Thread {
         else{
             if (fileTokens[1].equals(TEXT_EXTENSION)) {
                 mockSensorPrototypeOutputFileInfo.setOutputFileEnum(TXT);
-                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeperator(TEXT_COLUMN_SEPERATOR);
+                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeparator(TEXT_COLUMN_SEPERATOR);
             } else if (fileTokens[1].equals(EXCEL_FILENAME)) {
                 mockSensorPrototypeOutputFileInfo.setOutputFileEnum(CSV);
-                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeperator(EXCEL_COLUMN_SEPERATOR);
+                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeparator(EXCEL_COLUMN_SEPERATOR);
                 mockSensorPrototypeOutputFileInfo.getFileWriter().write("Timestamp,SensorId,");
                 List<String> sensorMessageFieldNames = mockSensorPrototype.getMessagePrototype().getFieldsPrototypes()
                         .stream()

@@ -8,7 +8,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConstantGenerationRate extends GenerationRate {
 
-    private  Object value;
+    private Object value;
 
     public Object getValue() {
         return value;
@@ -23,7 +23,6 @@ public class ConstantGenerationRate extends GenerationRate {
     }
 
     public ConstantGenerationRate(){}
-
 
     @Override
     public String toString() {
