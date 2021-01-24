@@ -1,26 +1,16 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Configs;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ResponseMessage;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.AuthService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.*;
 

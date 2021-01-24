@@ -23,29 +23,34 @@ public class ExchangeResponseBodyAdvice<T>   implements ResponseBodyAdvice<Objec
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         System.out.println("In supports() method of " + getClass().getSimpleName());
-        return /*returnType.getContainingClass() == SensorController.class &&*/ returnType.getParameterType() == ResponseEntity.class||returnType.getParameterType() == Exchange.class;
+        return returnType.getParameterType() == ResponseEntity.class || returnType.getParameterType() == Exchange.class;
     }
 
-
+    /**
+     *  The purpose of this function is to handle customized the response for the spring APIs from hanlded exchange's model or by Spring default response model.
+     **/
     @Override
-    public Object beforeBodyWrite(Object controllerResponse, MethodParameter returnType, MediaType selectedContentType,
-                                  Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
-                                  ServerHttpResponse response) {
-        System.out.println("In beforeBodyWrite() method of " + getClass().getSimpleName());
+    public Object beforeBodyWrite(Object controllerResponse,
+                                  MethodParameter returnType,
+                                  MediaType selectedContentType,
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  ServerHttpRequest request,
+                                  ServerHttpResponse response){
         if(returnType.getParameterType() == Exchange.class){
             Exchange exchange = (Exchange)controllerResponse;
             HttpStatus httpStatus = exchange.getHttpStatus();
             response.setStatusCode(httpStatus);
-            if(!(httpStatus == HTTP_SUCCESS || httpStatus == HTTP_CREATED || httpStatus == HTTP_NO_CONTENT)){
-                String errorMessageType=(String)exchange.getProperty(ERROR_MESSAGE_TYPE,String.class);
-                String exchangeErrorMessage=(String)exchange.getProperty(ERROR_MESSAGE);
-                String errorMessage=errorMessageType == null ? exchangeErrorMessage:errorMessageType+":"+exchangeErrorMessage;
+            if( ! (httpStatus == HTTP_SUCCESS || httpStatus == HTTP_CREATED || httpStatus == HTTP_NO_CONTENT) ){//Handle error response codes
+                String errorMessageType = (String)exchange.getProperty(ERROR_MESSAGE_TYPE, String.class);
+                String exchangeErrorMessage = (String)exchange.getProperty(ERROR_MESSAGE);
+                String errorMessage = errorMessageType == null ? exchangeErrorMessage : errorMessageType + ":" + exchangeErrorMessage;
                 ResponseMessage responseMessage = new ResponseMessage(errorMessage);
-                exchange.setBody(responseMessage);}
-            return  exchange.getBody();}
-        else if (returnType.getParameterType() == ResponseEntity.class){
-            if(controllerResponse instanceof HashMap)
-            {
+                exchange.setBody(responseMessage);
+            }
+            return  exchange.getBody();
+        }
+        else if (returnType.getParameterType() == ResponseEntity.class){//Handle Srping framework Error Response
+            if(controllerResponse instanceof HashMap){
                 HashMap<String, Object> responseFields = (HashMap<String, Object>) controllerResponse;
                 ResponseMessage responseMessage = new ResponseMessage("");
                 if (responseFields.containsKey("status")) {
@@ -54,12 +59,13 @@ public class ExchangeResponseBodyAdvice<T>   implements ResponseBodyAdvice<Objec
                 }
                 if (responseFields.containsKey("error"))
                     responseMessage.setMessage(responseFields.get("error").toString());
-
                 return responseMessage;
             }
             else
                 return controllerResponse;
         }
-        else{return controllerResponse;}
+        else{
+            return controllerResponse;
+        }
     }
 }
