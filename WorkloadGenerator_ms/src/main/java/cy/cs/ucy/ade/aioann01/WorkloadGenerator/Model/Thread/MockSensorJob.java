@@ -10,7 +10,6 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldVal
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorFieldStatistics;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +152,11 @@ public class MockSensorJob extends Thread{
     }
     
     public void sendMessage()throws RuntimeException {
-        String message = SensorUtils.createMessage(mockSensor.getMockSensorPrototype().getMessagePrototype(), this.sensorFieldStatistics, this.mockSensor.getMockSensorPrototype().getEvaluateFieldGenerationRate(), scenarioMode, scenarioFieldValueInfoMap);
+        String message = SensorUtils.createMessage(mockSensor.getMockSensorPrototype().getMessagePrototype(),
+                this.sensorFieldStatistics,
+                this.mockSensor.getMockSensorPrototype().getEvaluateFieldGenerationRate(),
+                scenarioMode,
+                scenarioFieldValueInfoMap);
         if (writeTofFile) {
             logToFile(message);
         }
@@ -214,7 +217,7 @@ public class MockSensorJob extends Thread{
                 }
                 try {//Calculate sleep time and sleep
                     Integer waitTime = 0;
-                    waitTime = (Integer)GenerationRatesUtils.generateGenerationRateValue(this.mockSensor.getMockSensorPrototype().getGenerationRate(), TypesEnum.INTEGER, this.mockSensor.getMockSensorPrototype().getGenerationRateType());
+                    waitTime = (Integer)SensorUtils.generateGenerationRateValue(this.mockSensor.getMockSensorPrototype().getGenerationRate(), TypesEnum.INTEGER);
                     if(waitTime < 0)
                         waitTime = 0;
                     Thread.sleep(waitTime * 1000);//seconds to ms

@@ -4,7 +4,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors.GetMockSensorP
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Repository.MockSensorPrototypeRepository;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -22,7 +22,7 @@ public class MockSensorPrototypeService{
         if(mockSensorPrototype != null)
             exchange.setBody(mockSensorPrototype);
         else{
-            Utils.setNotFoundErrorOnExchange(exchange, "MockSensorPrototype with name: "+mockSensorPrototypeName +" not found", VALIDATION_ERROR);
+            CommonUtils.setNotFoundErrorOnExchange(exchange, "MockSensorPrototype with name: "+mockSensorPrototypeName +" not found", VALIDATION_ERROR);
         }
 
     }

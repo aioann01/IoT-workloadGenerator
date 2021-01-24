@@ -3,10 +3,7 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -32,11 +29,6 @@ public class ApplicationPropertiesUtil{
 
     private static Boolean enabledAuthorization;
 
-
-//    @Bean
-//    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
-//        return new PropertySourcesPlaceholderConfigurer();
-//    }
 
     public static void setWorkloadGeneratorProperties() {
         try {
@@ -75,7 +67,6 @@ public class ApplicationPropertiesUtil{
     public  void setEnabledAuthorization(Boolean enabledAuthorization) {
         ApplicationPropertiesUtil.enabledAuthorization = enabledAuthorization;
         log.debug("Enabled Authorization:"+enabledAuthorization);
-
     }
 
 
@@ -90,7 +81,6 @@ public class ApplicationPropertiesUtil{
     public static Boolean getEnabledAuthorization() {
         return enabledAuthorization;
     }
-
 
     public static String getConfigsDirectory() {
         return configsDirectory;
@@ -109,7 +99,6 @@ public class ApplicationPropertiesUtil{
             try {
                 workloadGeneratorProperties = new Properties();
                 workloadGeneratorProperties.load(new FileInputStream(configsDirectory + WORKLOAD_GENERATOR_PROPERTIES_WINDOWS));
-
             } catch (Exception e) {
                 errorMessage = WORKLOAD_GENERATOR_PROPERTIES_WINDOWS + "file does not exist in " + configsDirectory;
                 log.error(errorMessage);
@@ -125,7 +114,6 @@ public class ApplicationPropertiesUtil{
             log.error(EXCEPTION_CAUGHT + e.getMessage(), e);
             throw new Exception(errorMessage);
         }
-
     }
 
 

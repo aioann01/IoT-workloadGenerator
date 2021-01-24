@@ -3,7 +3,6 @@ package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ReplayDataFromDatasetS
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.code.externalsorting.csv.CsvExternalSort;
 import com.google.code.externalsorting.csv.CsvSortOptions;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.GenerationRateEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorFieldStatistics;
@@ -12,7 +11,6 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSen
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ApplicationPropertiesService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -161,7 +159,7 @@ public class DatasetSensorPrototypeService {
             file = new File(resourcesDirectory + csvFileName);
             BufferedReader br = new BufferedReader(new FileReader(file));
             String firstLine = br.readLine();
-            String[] columnNames = firstLine.split(EXCEL_COLUMN_SEPERATOR);
+            String[] columnNames = firstLine.split(EXCEL_COLUMN_SEPARATOR);
             if(columnNames[0].startsWith(UTF8_BOM))
                 columnNames[0] = columnNames[0].substring(1);
             boolean sensorIdColumnNameFound = false;
@@ -266,9 +264,9 @@ public class DatasetSensorPrototypeService {
     }
 
 
-    public long calculateNextMessageTimeForGenerationRate(Object generationRate, GenerationRateEnum generationRateEnum){
+    public long calculateNextMessageTimeForGenerationRate(Object generationRate){
         try {
-            return (Integer) (GenerationRatesUtils.generateGenerationRateValue(generationRate, TypesEnum.INTEGER, generationRateEnum));
+            return (Integer)SensorUtils.generateGenerationRateValue(generationRate, TypesEnum.INTEGER);
         }catch(Exception exception){
             log.error("Could not cast calculated next sensor message time to integer.Default will be 1 s");
             return 1;

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.TimerTask;
 
-import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.MILISECONDS_TO_SECONDS;
+import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.MILLISECONDS_TO_SECONDS;
 
 public class ScenarioJob extends TimerTask{
 
@@ -42,7 +42,7 @@ public class ScenarioJob extends TimerTask{
             log.info("Scenario {"+scenario.getScenarioName()+"} started");
             mockSensorJob.triggerScenario(scenario);
            synchronized (this){
-               wait(scenario.getScenarioDuration() * MILISECONDS_TO_SECONDS);
+               wait(scenario.getScenarioDuration() * MILLISECONDS_TO_SECONDS);
            }
             mockSensorJob.terminateScenario();
             log.info("Scenario {"+ scenario.getScenarioName()+ "} was terminated");

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 
-import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.MILISECONDS_TO_SECONDS;
+import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.MILLISECONDS_TO_SECONDS;
 
 public class ScenarioManager {
 
@@ -24,7 +24,7 @@ public class ScenarioManager {
                 if(mockSensorJob.getSensorId().equals(scenario.getSensorId())){
                     ScenarioJob scenarioJob = new ScenarioJob(scenario, mockSensorJob);
                     scenarioJobs.add(scenarioJob);
-                    timer.schedule(scenarioJob,scenario.getScenarioDelay() * MILISECONDS_TO_SECONDS);
+                    timer.schedule(scenarioJob,scenario.getScenarioDelay() * MILLISECONDS_TO_SECONDS);
                     break;}
             }
         }

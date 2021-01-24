@@ -22,7 +22,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SendServices.MqttSensor
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServices.ProduceMockSensorDataService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServices.ReplaySensorCSVDataSetService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.ApplicationPropertiesUtil;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.Utils;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.CommonUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -219,7 +219,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService {
             else{
                 errorMessage = " configs_file does not contain sensorPrototypes";
                 log.error(errorMessage);
-                Utils.buildException(exchange,errorMessage,UNEXPECTED_ERROR_OCCURRED);
+                CommonUtils.buildException(exchange,errorMessage,UNEXPECTED_ERROR_OCCURRED);
             }
         }
         else{
@@ -270,7 +270,7 @@ public class WorkloadGeneratorService implements IWorkloadGeneratorService {
             workloadGenerator.setStarted(true);
         }else {
             log.error("Workload Generator could not be started. Check logs for errors");
-            Utils.buildException(exchange,"Workload Generator could not be started. Check logs for errors",UNEXPECTED_ERROR_OCCURRED);
+            CommonUtils.buildException(exchange,"Workload Generator could not be started. Check logs for errors",UNEXPECTED_ERROR_OCCURRED);
         }
     }
 

@@ -1,7 +1,6 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.SensorProtototypeServices;
 
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.GenerationRate.GenerationRateWrapper;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.Exchange;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.MockSensors.MockSensor;
@@ -16,7 +15,6 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorDataPr
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.Interface.ISensorMessageSendService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorPrototypeService;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Services.ProduceMockSensorDataServices.MockSensorService;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.SensorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -309,16 +307,15 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
 
     public List<ScenarioFieldValueInfo> getValidScenarioFieldValueInfoForMockSensorPrototype(String scenarioName, List<ScenarioFieldValueInfo> scenarioFieldValueInfoList, List<FieldPrototype> sensorPrototypeFieldPrototypes){
         List<ScenarioFieldValueInfo> validScenarioFieldValueInfoList = new ArrayList<>();
-        HashSet<String> fieldNameSet = new HashSet<>();
+        Map<String, FieldPrototype> fieldPrototypeMap = new HashMap<>();
         sensorPrototypeFieldPrototypes.stream().
-                forEach(field -> fieldNameSet.add(field.getName()));
+                forEach(fieldPrototype -> fieldPrototypeMap.put(fieldPrototype.getName(), fieldPrototype));
 
         for(ScenarioFieldValueInfo scenarioFieldValueInfo: scenarioFieldValueInfoList){
-            if(fieldNameSet.contains(scenarioFieldValueInfo.getSensorFieldScenarioName())){
+            String scenarioFieldName = scenarioFieldValueInfo.getSensorFieldScenarioName();
+            if(fieldPrototypeMap.containsKey(scenarioFieldName)){
                 try{
-                    GenerationRateWrapper generationRateWrapper = GenerationRatesUtils.processGenerationRate(scenarioFieldValueInfo.getSensorFieldScenarioGenerationRate());
-                    scenarioFieldValueInfo.setSensorFieldScenarioGenerationRate(generationRateWrapper.getGenerationRate());
-                    scenarioFieldValueInfo.setSensorFieldScenarioGenerationRateEnum(generationRateWrapper.getGenerationRateEnum());
+                    scenarioFieldValueInfo.setSensorFieldScenarioGenerationRate(SensorUtils.processAndValidateGenerationRate(scenarioFieldValueInfo.getSensorFieldScenarioGenerationRate(), fieldPrototypeMap.get(scenarioFieldName).getTypeEnum()));
                 }catch (Exception exception){
                     log.error("Could not process generationRate for field {"+scenarioFieldValueInfo.getSensorFieldScenarioName()+"} and scenario {"+scenarioName+"} due to "+exception.getMessage()+".Scenario field will be ignored.");
                 }
@@ -328,7 +325,6 @@ public class ProduceMockSensorDataService implements ISensorDataProducerService 
                 log.error("Could not find scenario field {"+scenarioFieldValueInfo.getSensorFieldScenarioName()+"} for scenario {"+scenarioName+"} for the sensorPrototype .Scenario field will be ignored.");
             }
         }
-
         return validScenarioFieldValueInfoList;
     }
 

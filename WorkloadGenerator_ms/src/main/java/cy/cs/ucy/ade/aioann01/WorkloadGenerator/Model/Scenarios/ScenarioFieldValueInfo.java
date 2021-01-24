@@ -1,7 +1,6 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.GenerationRateEnum;
 
 public class ScenarioFieldValueInfo {
 
@@ -11,8 +10,6 @@ public class ScenarioFieldValueInfo {
     @JsonProperty("sensorFieldScenarioGenerationRate")
     private Object sensorFieldScenarioGenerationRate;
 
-    @JsonProperty("sensorFieldScenarioGenerationRateEnum")
-    private GenerationRateEnum sensorFieldScenarioGenerationRateEnum;
 
     public String getSensorFieldScenarioName() {
         return sensorFieldScenarioName;
@@ -30,11 +27,4 @@ public class ScenarioFieldValueInfo {
         this.sensorFieldScenarioGenerationRate = sensorFieldScenarioGenerationRate;
     }
 
-    public GenerationRateEnum getSensorFieldScenarioGenerationRateEnum() {
-        return sensorFieldScenarioGenerationRateEnum;
-    }
-
-    public void setSensorFieldScenarioGenerationRateEnum(GenerationRateEnum sensorFieldScenarioGenerationRateEnum) {
-        this.sensorFieldScenarioGenerationRateEnum = sensorFieldScenarioGenerationRateEnum;
-    }
 }

@@ -7,7 +7,6 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.GenerationRate.*;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.Scenario;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldValueInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSensorPrototype;
@@ -32,11 +31,8 @@ import java.util.stream.Stream;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.OutputFileEnum.CSV;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum.*;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum.*;
-import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.GenerationRateEnum.*;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.*;
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorConstants.*;
-
-import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.GenerationRatesUtils.*;
 
 public class SensorUtils<T> {
 
@@ -52,7 +48,7 @@ public class SensorUtils<T> {
             if (fieldPrototype.getTypeEnum().equals(OBJECT)) {
                 ArrayList<LinkedHashMap<String, Object>> fieldPrototypes = (ArrayList<LinkedHashMap<String, Object>>) fieldPrototype.getValue();
                 List<FieldPrototype> fieldPrototypeList = fieldPrototypes.stream()
-                        .map(fieldPrototypeHash -> objectMapper.convertValue(fieldPrototypeHash, FieldPrototype.class))
+                        .map(fieldPrototypeLinkedHashMap -> objectMapper.convertValue(fieldPrototypeLinkedHashMap, FieldPrototype.class))
                         .map(fieldPrototype1 ->
                         {
                             setFieldTypeEnum(fieldPrototype1);
@@ -61,47 +57,86 @@ public class SensorUtils<T> {
                         })
                         .collect(Collectors.toList());
                 fieldPrototype.setValue(fieldPrototypeList);
-            } else {
-                LinkedHashMap<String, Object> initialFieldPrototypeValue = (LinkedHashMap<String, Object>) fieldPrototype.getValue();
-
-                if (initialFieldPrototypeValue.containsKey("normalDistribution")) {
-                    fieldPrototype.setValue(objectMapper.convertValue(initialFieldPrototypeValue.get("normalDistribution"), NormalDistributionGenerationRate.class));
-                    NormalDistributionGenerationRate updatedNornamlDistributionGenerationRate = GenerationRatesUtils.validateNormalDistributionGenerationRateValue(fieldPrototype.getValue(), fieldPrototype.getTypeEnum());
-                    if (updatedNornamlDistributionGenerationRate == null)
-                        throw new RuntimeException("Value of field with name {" + fieldPrototype.getName() + "} is either null or don't match provided type: " + fieldPrototype.getType());
-                    fieldPrototype.setValue(updatedNornamlDistributionGenerationRate);
-                    fieldPrototype.setGenerationRateEnum(NORMAL_DISTRIBUTION);
-                } else if (initialFieldPrototypeValue.containsKey("distributions")) {
-                    fieldPrototype.setValue(objectMapper.convertValue(fieldPrototype.getValue(), DistributionGenerationRate.class));
-                    DistributionGenerationRate updatedDistributionGenerationRate = GenerationRatesUtils.validateDistributionGenerationRateValue(fieldPrototype.getValue(), fieldPrototype.getTypeEnum());
-                    if (updatedDistributionGenerationRate == null)
-                        throw new RuntimeException("Value of field with name {" + fieldPrototype.getName() + "} is either null or don't match provided type: " + fieldPrototype.getType() + " or probabilities provided for distributions are not double type or have sum 1");
-                    fieldPrototype.setValue(updatedDistributionGenerationRate);
-                    fieldPrototype.setGenerationRateEnum(DISTRIBUTION);
-                } else if (initialFieldPrototypeValue.containsKey("constant")) {
-                    fieldPrototype.setValue(objectMapper.convertValue(initialFieldPrototypeValue.get("constant"), ConstantGenerationRate.class));
-                    if (!GenerationRatesUtils.validateConstantGenerationRateValue(fieldPrototype.getTypeEnum(), fieldPrototype.getValue()))
-                        throw new RuntimeException("Value of field with name {" + fieldPrototype.getName() + "} is either null or don't match provided type: " + fieldPrototype.getType());
-                    fieldPrototype.setGenerationRateEnum(CONSTANT);
-                } else if (initialFieldPrototypeValue.containsKey("random")) {
-                    fieldPrototype.setValue(objectMapper.convertValue(initialFieldPrototypeValue.get("random"), RandomGenerationRate.class));
-                    RandomGenerationRate updatedRandomGenerarationRate = GenerationRatesUtils.validateRandomGenerationRateValue(fieldPrototype.getValue(), fieldPrototype.getTypeEnum());
-                    if (updatedRandomGenerarationRate == null)
-                        throw new RuntimeException("Value of field with name {" + fieldPrototype.getName() + "} is either null or don't match provided type: " + fieldPrototype.getType());
-                    fieldPrototype.setValue(updatedRandomGenerarationRate);
-                    fieldPrototype.setGenerationRateEnum(RANDOM);
-                } else {
-                    errorMessage = "Not supported generation rate type for field " + fieldPrototype.getName();
-                    log.error(errorMessage);
-                }
+            }else {
+                fieldPrototype.setValue(processAndValidateGenerationRate(fieldPrototype.getValue(), fieldPrototype.getTypeEnum()));
             }
         } catch (Exception exception) {
             log.error(EXCEPTION_CAUGHT + exception.getMessage(), exception);
-            throw exception;
+            //throw exception;
         }
         if (errorMessage != null)
             throw new RuntimeException(errorMessage);
     }
+
+
+
+
+    public static Object generateGenerationRateValue(Object generationRateValue, TypesEnum type){
+        GenerationRate generationRate = (GenerationRate)(generationRateValue);
+        return generationRate.generateValue(type);
+    }
+
+
+
+//    public static GenerationRate createAndValidateGenerationRate(Object generationRateObject, TypesEnum typesEnum) throws ValidationException{
+//        String errorMessage = null;
+//        LinkedHashMap<String, Object> initialFieldPrototypeValue = (LinkedHashMap<String, Object>) generationRateObject;
+//        GenerationRate generationRate = null;
+//        if (initialFieldPrototypeValue.containsKey("normalDistribution")) {
+//            generationRate = objectMapper.convertValue(initialFieldPrototypeValue.get("normalDistribution"), NormalDistributionGenerationRate.class);
+//        } else if (initialFieldPrototypeValue.containsKey("distributions")) {
+//            generationRate = objectMapper.convertValue(initialFieldPrototypeValue.get("normalDistribution"), NormalDistributionGenerationRate.class);
+//        }else if(initialFieldPrototypeValue.containsKey("constant")) {
+//            generationRate = objectMapper.convertValue(initialFieldPrototypeValue.get("constant"), ConstantGenerationRate.class);
+//        } else if (initialFieldPrototypeValue.containsKey("distributions")) {
+//            generationRate = objectMapper.convertValue(generationRateObject, DistributionGenerationRate.class);
+//        } else if (initialFieldPrototypeValue.containsKey("random")) {
+//            generationRate = objectMapper.convertValue(initialFieldPrototypeValue.get("random"), RandomGenerationRate.class);
+//        }
+//        else {
+//            errorMessage = "Not supported generation rate type";
+//            log.error(errorMessage);
+//        }
+//        generationRate.processAndValidate(typesEnum);
+////        if(generationRate == null)
+////            throw new RuntimeException("Value of field with name {" + fieldPrototype.getName() + "} is either null or don't match provided type: " + fieldPrototype.getType());
+//        return generationRate;
+//    }
+
+
+    public static GenerationRate processAndValidateGenerationRate(Object generationRateToBeProcessedObject, TypesEnum typesEnum) throws Exception{
+        String errorMessage = null;
+        GenerationRate generationRate = null;
+        try {
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            LinkedHashMap<String, Object> generationRateToBeProcessedObjectLinkedHashMap = (LinkedHashMap<String, Object>) generationRateToBeProcessedObject;
+            if(generationRateToBeProcessedObjectLinkedHashMap.get("value") != null)
+                generationRateToBeProcessedObjectLinkedHashMap = (LinkedHashMap<String, Object>)generationRateToBeProcessedObjectLinkedHashMap.get("value");
+            if (generationRateToBeProcessedObjectLinkedHashMap.containsKey("normalDistribution")) {
+                generationRate = objectMapper.convertValue(generationRateToBeProcessedObjectLinkedHashMap.get("normalDistribution"), NormalDistributionGenerationRate.class);
+            } else if (generationRateToBeProcessedObjectLinkedHashMap.containsKey("distributions")) {
+                generationRate = objectMapper.convertValue(generationRateToBeProcessedObjectLinkedHashMap, DistributionGenerationRate.class);
+            }else if(generationRateToBeProcessedObjectLinkedHashMap.containsKey("constant")) {
+                generationRate = objectMapper.convertValue(generationRateToBeProcessedObjectLinkedHashMap.get("constant"), ConstantGenerationRate.class);
+            } else if (generationRateToBeProcessedObjectLinkedHashMap.containsKey("distributions")) {
+                generationRate = objectMapper.convertValue(generationRateToBeProcessedObject, DistributionGenerationRate.class);
+            } else if (generationRateToBeProcessedObjectLinkedHashMap.containsKey("random")) {
+                generationRate = objectMapper.convertValue(generationRateToBeProcessedObjectLinkedHashMap.get("random"), RandomGenerationRate.class);
+            }
+            else {
+                errorMessage = "Not supported generation rate type";
+                log.error(errorMessage);
+                throw new Exception(errorMessage);
+            }
+            generationRate.processAndValidate(typesEnum);
+            return generationRate;
+        } catch (Exception exception) {
+            log.error(EXCEPTION_CAUGHT + exception.getMessage(), exception);
+            throw exception;
+        }
+    }
+
+
 
     public static Number validateNumberValueType(TypesEnum type, Number number) {
         if (type.equals(DOUBLE) && number instanceof Integer)
@@ -110,17 +145,11 @@ public class SensorUtils<T> {
 
     }
 
-    public static boolean validateValueType(TypesEnum type, Object value) {
-
+    public static boolean isValueOfType(TypesEnum type, Object value) {
         return castValue(value, type) == null ? false : true;
 
     }
 
-    public static void setSensorPrototypeGenerationRate(SensorPrototype sensorPrototype) throws Exception {
-        GenerationRateWrapper generationRateWrapper = GenerationRatesUtils.processGenerationRate(sensorPrototype.getGenerationRate());
-        sensorPrototype.setGenerationRate(generationRateWrapper.getGenerationRate());
-        sensorPrototype.setGenerationRateType(generationRateWrapper.getGenerationRateEnum());
-    }
 
     public static void setDatasetSensorPrototypeMessageType(DatasetSensorPrototype datasetSensorPrototype) throws Exception {
         if (datasetSensorPrototype.getMessageExportType() == null) {
@@ -128,7 +157,7 @@ public class SensorUtils<T> {
             datasetSensorPrototype.setSensorMessageEnum(JSON);
             return;
         }
-        switch (datasetSensorPrototype.getMessageExportType()) {
+        switch (datasetSensorPrototype.getMessageExportType().toLowerCase()) {
             case "xml":
                 datasetSensorPrototype.setSensorMessageEnum(XML);
                 break;
@@ -145,13 +174,13 @@ public class SensorUtils<T> {
     }
 
 
-    public static void setSensorMessagePrototypeType(SensorPrototype sensorPrototype) throws Exception {
+    public static void processSensorMessagePrototypeType(SensorPrototype sensorPrototype) throws Exception {
         if (sensorPrototype.getMessagePrototype().getType() == null) {
             log.warn("sensorMessagePrototype type for sensorPrototype has not been provided. Json type will be used as default");
             sensorPrototype.getMessagePrototype().setSensorMessageType(JSON);
             return;
         }
-        switch (sensorPrototype.getMessagePrototype().getType()) {
+        switch (sensorPrototype.getMessagePrototype().getType().toLowerCase()) {
             case "xml":
                 sensorPrototype.getMessagePrototype().setSensorMessageType(XML);
                 break;
@@ -171,9 +200,9 @@ public class SensorUtils<T> {
         SensorMessagePrototype sensorMessagePrototype = sensorPrototype.getMessagePrototype();
         if (sensorMessagePrototype != null || sensorPrototype instanceof DatasetSensorPrototype) {
             if (sensorPrototype instanceof MockSensorPrototype || (sensorPrototype instanceof DatasetSensorPrototype && sensorPrototype.getGenerationRate() != null))
-                SensorUtils.setSensorPrototypeGenerationRate(sensorPrototype);
+                sensorPrototype.setGenerationRate(SensorUtils.processAndValidateGenerationRate(sensorPrototype.getGenerationRate(), INTEGER));
             if (sensorPrototype instanceof MockSensorPrototype || (sensorPrototype instanceof DatasetSensorPrototype && sensorPrototype.getMessagePrototype() != null))
-                SensorUtils.setSensorMessagePrototypeType(sensorPrototype);
+                SensorUtils.processSensorMessagePrototypeType(sensorPrototype);
             if (sensorMessagePrototype != null) {
                 List<FieldPrototype> fieldPrototypes = sensorMessagePrototype.getFieldsPrototypes();
                 if (fieldPrototypes != null && !fieldPrototypes.isEmpty()) {
@@ -222,7 +251,6 @@ public class SensorUtils<T> {
                     ScenarioFieldValueInfo scenarioFieldValueInfo = scenarioFieldValueInfoMap.get(fieldPrototype.getName());
                     FieldPrototype scenarioFieldPrototype = fieldPrototype.copyFieldPrototype();
                     scenarioFieldPrototype.setValue(scenarioFieldValueInfo.getSensorFieldScenarioGenerationRate());
-                    scenarioFieldPrototype.setGenerationRateEnum(scenarioFieldValueInfo.getSensorFieldScenarioGenerationRateEnum());
                     fieldValue = setFieldValue(scenarioFieldPrototype, sensorFieldStatistics[i], evaluateFieldValue);
                 }
                 else
@@ -233,7 +261,6 @@ public class SensorUtils<T> {
                 log.error("Could not create mock field value for " + fieldPrototype.getName(), e);
             }
         }
-
 
         String formattedMessage = null;
         if (messagePrototype.getSensorMessageType().equals(JSON))
@@ -267,7 +294,6 @@ public class SensorUtils<T> {
                 } else {
                     value = convertJSONtoXMLString(childJSONObject);
                 }
-
                 xmlString = xmlString + "<" + field + ">" + value + "</" + field + ">";
             }
             return xmlString;
@@ -276,6 +302,7 @@ public class SensorUtils<T> {
             return "";
         }
     }
+
 
     public static String processXMLValue(String value) {
         String validXMLString = value;
@@ -327,19 +354,8 @@ public class SensorUtils<T> {
 
 
     public static Object createFieldValue(FieldPrototype fieldPrototype) {
-
-        switch (fieldPrototype.getGenerationRateEnum()) {
-            case RANDOM:
-                return generateRandomGenerationRateValue(fieldPrototype.getValue(), fieldPrototype.getTypeEnum());
-            case CONSTANT:
-                return generateConstantGenerationRateValue(fieldPrototype.getValue(), fieldPrototype.getTypeEnum());
-            case DISTRIBUTION:
-                return generateDistributionGenerationRateValue(fieldPrototype.getValue(), fieldPrototype.getTypeEnum());
-            case NORMAL_DISTRIBUTION:
-                return generateNormalDistributionGenerationRateValue(fieldPrototype.getValue(), fieldPrototype.getTypeEnum());
-            default:
-                return null;
-        }
+        GenerationRate generationRate = (GenerationRate)(fieldPrototype.getValue());
+        return generationRate.generateValue(fieldPrototype.getTypeEnum());
     }
 
 
@@ -388,14 +404,14 @@ public class SensorUtils<T> {
         }
         if (type.isInstance(value)) {
             return (T) value;
-        } else return null;
+        } else
+            return null;
     }
 
 
     public static SensorFieldStatistics createSensorFieldValueStatistics(FieldPrototype fieldPrototype) {
         if (fieldPrototype != null) {
             SensorFieldStatistics sensorFieldStatistics = new SensorFieldStatistics();
-
             sensorFieldStatistics.setFieldName(fieldPrototype.getName());
             sensorFieldStatistics.setSumOfGenerationRate(0);
             switch (fieldPrototype.getTypeEnum()) {
@@ -419,7 +435,6 @@ public class SensorUtils<T> {
                     sensorFieldStatistics.setFalseCount(0);
                     sensorFieldStatistics.setTrueCount(0);
                 default:
-
                     sensorFieldStatistics.setType(TypesEnum.STRING);
             }
             return sensorFieldStatistics;
@@ -430,7 +445,6 @@ public class SensorUtils<T> {
     public static SensorFieldStatistics createSensorFieldValueStatistics(String fieldValue, String fieldName) {
         if (fieldValue != null) {
             SensorFieldStatistics sensorFieldStatistics = new SensorFieldStatistics();
-
             sensorFieldStatistics.setFieldName(fieldName);
             sensorFieldStatistics.setSumOfGenerationRate(0);
 //            if (Utils.isStringInteger(fieldValue)) {
@@ -441,14 +455,14 @@ public class SensorUtils<T> {
 //                sensorFieldStatistics.setSampleValues(new ArrayList<>());
 //            }
 //            else
-            if (Utils.isStringDouble(fieldValue)) {
+            if (CommonUtils.isStringDouble(fieldValue)) {
                 sensorFieldStatistics.setType(TypesEnum.DOUBLE);
                 sensorFieldStatistics.setSum(0.0);
                 sensorFieldStatistics.setMinValue(Double.MAX_VALUE);
                 sensorFieldStatistics.setMaxValue(Double.MIN_VALUE);
                 sensorFieldStatistics.setSampleValues(new ArrayList<>());
 
-            } else if (Utils.isStringBoolean(fieldValue)) {
+            } else if (CommonUtils.isStringBoolean(fieldValue)) {
                 sensorFieldStatistics.setType(TypesEnum.BOOLEAN);
                 sensorFieldStatistics.setFalseCount(0);
                 sensorFieldStatistics.setTrueCount(0);
@@ -467,7 +481,7 @@ public class SensorUtils<T> {
             switch (valuesStatistics.getType()) {
                 case DOUBLE:
                 case INTEGER:
-                    Number numberValue = Utils.castToNumber(fieldValue, valuesStatistics.getType());
+                    Number numberValue = CommonUtils.castToNumber(fieldValue, valuesStatistics.getType());
                     if (numberComparator.compare(numberValue, valuesStatistics.getMinValue()) < 0) {
                         valuesStatistics.setMinValue(numberValue);
                     }
@@ -484,18 +498,17 @@ public class SensorUtils<T> {
                         valuesStatistics.setTrueCount(valuesStatistics.getTrueCount() + 1);
                     break;
             }
-
         } catch (Exception exception) {
-            log.error("Exception caught while saving sattistics of field {" + valuesStatistics.getFieldName() + "} :" + exception.getMessage());
+            log.error("Exception caught while saving statistics of field {" + valuesStatistics.getFieldName() + "} :" + exception.getMessage());
         }
     }
 
-    public static Boolean isTypeNUmeric(TypesEnum typesEnum) {
+    public static Boolean isTypeNumeric(TypesEnum typesEnum) {
         return typesEnum.equals(INTEGER) || typesEnum.equals(DOUBLE);
     }
 
     public static void mergeSensorFieldStatistics(SensorFieldStatistics sensorFieldStatistics1, SensorFieldStatistics sensorFieldStatistics2) {
-        if (SensorUtils.isTypeNUmeric(sensorFieldStatistics1.getType())) {
+        if (SensorUtils.isTypeNumeric(sensorFieldStatistics1.getType())) {
             sensorFieldStatistics1.setSum(sensorFieldStatistics1.getSum() + sensorFieldStatistics2.getSum());
             sensorFieldStatistics1.setSampleValues(
                     Stream.concat(sensorFieldStatistics1.getSampleValues().stream(), sensorFieldStatistics2.getSampleValues().stream())
@@ -568,10 +581,10 @@ public class SensorUtils<T> {
         int falseValues = sensorFieldStatistics.getFalseCount();
         Distribution falseDistribution = new Distribution(false, falseValues * 1.0 / sensorFieldStatistics.getSamplesCount());
         Distribution trueDistribution = new Distribution(true, trueValues * 1.0 / sensorFieldStatistics.getSamplesCount());
-        List<Distribution> boleanDistributions = new ArrayList<>();
-        boleanDistributions.add(trueDistribution);
-        boleanDistributions.add(falseDistribution);
-        DistributionGenerationRate distributionGenerationRate = new DistributionGenerationRate(boleanDistributions);
+        List<Distribution> booleanDistributions = new ArrayList<>();
+        booleanDistributions.add(trueDistribution);
+        booleanDistributions.add(falseDistribution);
+        DistributionGenerationRate distributionGenerationRate = new DistributionGenerationRate(booleanDistributions);
         fieldPrototype.setValue(distributionGenerationRate);
     }
 
@@ -615,8 +628,8 @@ public class SensorUtils<T> {
     public static String createCSVOutputRecord(MockSensorPrototypeOutputFileInfo mockSensorPrototypeOutputFileInfo, FileRecord fileRecord) throws Exception{
 
         StringBuilder record = new StringBuilder();
-        record.append(fileRecord.getDate() + mockSensorPrototypeOutputFileInfo.getMessageFieldsSeperator());
-        record.append(fileRecord.getSensorId() + mockSensorPrototypeOutputFileInfo.getMessageFieldsSeperator());
+        record.append(fileRecord.getDate() + mockSensorPrototypeOutputFileInfo.getMessageFieldsSeparator());
+        record.append(fileRecord.getSensorId() + mockSensorPrototypeOutputFileInfo.getMessageFieldsSeparator());
         String recordValues = null;
         if(mockSensorPrototypeOutputFileInfo.getOutputFileEnum().equals(CSV)) {
             switch (mockSensorPrototypeOutputFileInfo.getSensorMessageEnum()) {
@@ -668,7 +681,7 @@ public class SensorUtils<T> {
                         recordValues.append(
                                 hasChildNodes(node)
                                         ?"Object"
-                                        :node.getTextContent() + EXCEL_COLUMN_SEPERATOR
+                                        :node.getTextContent() + EXCEL_COLUMN_SEPARATOR
                         );
                 }
             }
@@ -699,16 +712,14 @@ public class SensorUtils<T> {
                 if (i + 1 == mockSensorPrototypeOutputFileInfo.getSensorMessageFieldNames().length)
                     record.append(columnValue);
                 else
-                    record.append(columnValue + mockSensorPrototypeOutputFileInfo.getMessageFieldsSeperator());
+                    record.append(columnValue + mockSensorPrototypeOutputFileInfo.getMessageFieldsSeparator());
             }
             return record.toString();
         }
         catch (Exception e){
-            return  fileRecord.getMessage().toString();
+            return fileRecord.getMessage().toString();
         }
     }
-
-
 
 
 }

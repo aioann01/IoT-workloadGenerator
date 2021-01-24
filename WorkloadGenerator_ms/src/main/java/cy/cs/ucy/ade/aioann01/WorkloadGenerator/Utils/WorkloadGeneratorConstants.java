@@ -5,11 +5,11 @@ public class WorkloadGeneratorConstants {
     public static final String ASYNC_MESSAGES = "sensor.messages.async";
     public static final String  CONFIG_FILE = "configs_file.json";
     public static final String DELAY = "delay";
-    public static final String OUTPUT_FILE_FOR_MOCK_SENSOR_DATA ="outputFileFoMockSensorData";
+    public static final String OUTPUT_FILE_FOR_MOCK_SENSOR_DATA = "outputFileFoMockSensorData";
     public static final String TEXT_EXTENSION = "txt";
     public static final String EXCEL_FILENAME = "csv";
-    public static final String TEXT_COLUMN_SEPERATOR = " ";
-    public static final String EXCEL_COLUMN_SEPERATOR = ",";
+    public static final String TEXT_COLUMN_SEPARATOR = " ";
+    public static final String EXCEL_COLUMN_SEPARATOR = ",";
     public static final String ROOT_XML_ELEMENT_START = "<root>";
     public static final String ROOT_XML_ELEMENT_END = "</root>";
     public static final String SENSOR_ID_XML_ELEMENT_START = "<sensorId>";
@@ -31,9 +31,10 @@ public class WorkloadGeneratorConstants {
     public static final String SENSOR_PROTOTYPES = "sensorPrototypes";
     public static final String MOCK_SENSOR_PROTOTYPE = "mockSensorPrototype";
     public static final String DATASET_SENSOR_PROTOTYPE = "datasetSensorPrototype";
-    public static final String REQUEST_URI ="requestURI";
-    public static final String REQUEST_METHOD ="requestMethod";
-    public static final String TOPIC_NAME ="topicName";
+    public static final String REQUEST_URI = "requestURI";
+    public static final String REQUEST_METHOD = "requestMethod";
+    public static final String TOPIC_NAME = "topicName";
     public static final String HISTOGRAM_BINS_NUMBER = "histograms.bins.number";
+    public static final String DECIMAL_FORMAT_PATTERN = "#.##";
 
 }

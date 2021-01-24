@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.FrameworkConstants.*;
-import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorConstants.EXCEL_COLUMN_SEPERATOR;
+import static cy.cs.ucy.ade.aioann01.WorkloadGenerator.Utils.WorkloadGeneratorConstants.EXCEL_COLUMN_SEPARATOR;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class ReplayDatasetSensorPrototypeThread extends Thread{
@@ -158,7 +158,7 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
             int sensorIDColumnIndex = -1;
             int timestampColumnIndex= 0;
             String firstLine = bufferedReader.readLine().replaceAll("\"","");
-            String[] columnNames = firstLine.split(EXCEL_COLUMN_SEPERATOR);
+            String[] columnNames = firstLine.split(EXCEL_COLUMN_SEPARATOR);
             for(int i=0; i<columnNames.length;++i){
                 if(columnNames[i].equals(datasetSensorPrototype.getSensorIdColumnName()))
                     sensorIDColumnIndex = i;
@@ -166,7 +166,7 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
                     timestampColumnIndex = i;
             }
             String firstRecord = bufferedReader.readLine().replaceAll("\"","");
-            String [] firstColumnValues = firstRecord.split(EXCEL_COLUMN_SEPERATOR);
+            String [] firstColumnValues = firstRecord.split(EXCEL_COLUMN_SEPARATOR);
             try {
                 if (datasetSensorPrototype.getTimestampedDataset()) {
                     previousDate = formatter.parse(firstColumnValues[timestampColumnIndex]);
@@ -193,7 +193,7 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
                         log.debug("ReplayDatasetSensorPrototypeThread for datasetSensorPrototype {" + datasetSensorPrototype.getSensorPrototypeName() + "}  wakes up and will continue tasks");
                     }
                 }
-                String[] columnValues = record.split(EXCEL_COLUMN_SEPERATOR);
+                String[] columnValues = record.split(EXCEL_COLUMN_SEPARATOR);
 
                 if (datasetSensorPrototype.getTimestampedDataset()) {
                     Date currentDate = formatter.parse(columnValues[timestampColumnIndex]);
@@ -202,10 +202,10 @@ public class ReplayDatasetSensorPrototypeThread extends Thread{
                         record = bufferedReader.readLine();
                         continue;
                     }
-                    waitTime =  (currentDate.getTime()-previousDate.getTime())/MILISECONDS_TO_SECONDS;//-.(currentTs.getTime() - previousTimestamp.getTime()) / MILISECONDS_TO_SECONDS; //Calculate time in ms and convert to Seconds
+                    waitTime =  (currentDate.getTime()-previousDate.getTime())/ MILLISECONDS_TO_SECONDS;//-.(currentTs.getTime() - previousTimestamp.getTime()) / MILISECONDS_TO_SECONDS; //Calculate time in ms and convert to Seconds
                     previousDate = currentDate;
                 } else
-                    waitTime = datasetSensorPrototypeService.calculateNextMessageTimeForGenerationRate(datasetSensorPrototype.getGenerationRate(), datasetSensorPrototype.getGenerationRateType());
+                    waitTime = datasetSensorPrototypeService.calculateNextMessageTimeForGenerationRate(datasetSensorPrototype.getGenerationRate());
                 if(waitTime >= 0){
                     SECONDS.sleep(waitTime);
                     String sensorId = datasetSensorPrototype.getSensorIdColumnName() == null || datasetSensorPrototype.getSensorIdColumnName().isEmpty()

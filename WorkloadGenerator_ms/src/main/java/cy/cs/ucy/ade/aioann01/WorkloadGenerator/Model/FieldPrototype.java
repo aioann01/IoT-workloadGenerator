@@ -1,7 +1,6 @@
 package cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.GenerationRateEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,19 +14,16 @@ public class FieldPrototype<T> {
 
     private TypesEnum typeEnum;
 
-    private GenerationRateEnum generationRateEnum;
-
     private String unit;
 
     public FieldPrototype() {
     }
 
-    public FieldPrototype(String name, T value, String type, TypesEnum typeEnum, GenerationRateEnum generationRateEnum, String unit) {
+    public FieldPrototype(String name, T value, String type, TypesEnum typeEnum, String unit) {
         this.name = name;
         this.value = value;
         this.type = type;
         this.typeEnum = typeEnum;
-        this.generationRateEnum = generationRateEnum;
         this.unit = unit;
     }
 
@@ -46,14 +42,6 @@ public class FieldPrototype<T> {
 
     public void setTypeEnum(TypesEnum typeEnum) {
         this.typeEnum = typeEnum;
-    }
-
-    public GenerationRateEnum getGenerationRateEnum() {
-        return generationRateEnum;
-    }
-
-    public void setGenerationRateEnum(GenerationRateEnum generationRateEnum) {
-        this.generationRateEnum = generationRateEnum;
     }
 
     public String getName() {

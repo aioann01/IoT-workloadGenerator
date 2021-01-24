@@ -52,8 +52,8 @@ public class FrameworkConstants {
     public static final String REQUEST_HTTP_METHOD = "requestHttpMethod";
     public static final String REQUEST_RETURN_TYPE = "requestReturnType";
     public static final String HTTP_QUERY_PARAMETER = "?";
-    public static final String AUTHORIZATION_ENABLED_PROPERTY ="Authorization.enabled";
-    public static int MILISECONDS_TO_SECONDS = 1000;
+    public static final String AUTHORIZATION_ENABLED_PROPERTY = "Authorization.enabled";
+    public static int MILLISECONDS_TO_SECONDS = 1000;
     public static final String UTF8_BOM = "\uFEFF";
     public static final String SIMPLE_DATE_FORMAT_FOR_SORTED_CSV = "yyyy-MM-dd HH:mm:ss";
 

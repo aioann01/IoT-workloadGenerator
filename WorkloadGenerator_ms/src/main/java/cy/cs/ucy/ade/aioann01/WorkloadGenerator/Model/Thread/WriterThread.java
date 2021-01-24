@@ -54,10 +54,10 @@ public class WriterThread extends Thread {
         else{
             if (fileTokens[1].equals(TEXT_EXTENSION)) {
                 mockSensorPrototypeOutputFileInfo.setOutputFileEnum(TXT);
-                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeparator(TEXT_COLUMN_SEPERATOR);
+                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeparator(TEXT_COLUMN_SEPARATOR);
             } else if (fileTokens[1].equals(EXCEL_FILENAME)) {
                 mockSensorPrototypeOutputFileInfo.setOutputFileEnum(CSV);
-                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeparator(EXCEL_COLUMN_SEPERATOR);
+                mockSensorPrototypeOutputFileInfo.setMessageFieldsSeparator(EXCEL_COLUMN_SEPARATOR);
                 mockSensorPrototypeOutputFileInfo.getFileWriter().write("Timestamp,SensorId,");
                 List<String> sensorMessageFieldNames = mockSensorPrototype.getMessagePrototype().getFieldsPrototypes()
                         .stream()
