@@ -5,7 +5,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-				dir('Workload Generator') 
+				dir('Workload Generator'){
+					sh "pwd"}				
 				sh 'build'
             }
         }
