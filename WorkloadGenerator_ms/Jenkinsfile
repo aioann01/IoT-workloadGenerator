@@ -7,7 +7,7 @@ pipeline {
                 echo 'Building..'
 				dir('WorkloadGenerator_ms'){
 					sh "pwd"}				
-				sh 'build'
+				sh('./build.sh')
             }
         }
         stage('Test') {
