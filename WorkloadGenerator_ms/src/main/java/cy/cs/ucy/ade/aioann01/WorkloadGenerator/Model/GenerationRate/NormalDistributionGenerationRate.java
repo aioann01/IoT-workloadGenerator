@@ -65,7 +65,7 @@ public class NormalDistributionGenerationRate extends GenerationRate{
         Number updatedMean = validateNumberValueType(type, mean);
         Number updatedDeviation = validateNumberValueType(type, deviation);
         if(updatedMean == null || updatedDeviation == null)
-            throw new ValidationException("toDo");
+            throw new ValidationException("Could not process NormalDistributionGenerationRate. Mean Deviation values must be Numbers");
         else{
             mean = updatedMean;
             deviation = updatedDeviation;

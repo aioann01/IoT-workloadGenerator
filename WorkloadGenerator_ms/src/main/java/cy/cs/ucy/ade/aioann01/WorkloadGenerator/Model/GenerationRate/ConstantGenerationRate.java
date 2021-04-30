@@ -44,6 +44,6 @@ public class ConstantGenerationRate extends GenerationRate {
     @Override
     public void processAndValidate(TypesEnum type) throws ValidationException {
         if(value == null || !isValueOfType(type, value))
-            throw new ValidationException("toDo");
+            throw new ValidationException("Could not parse and process ConstantGenerationRate. Verify value exists and is correct type");
     }
 }

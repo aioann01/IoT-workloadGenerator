@@ -7,6 +7,7 @@ import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.*;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.SensorMessageEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Enums.TypesEnum;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.GenerationRate.*;
+import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Http.ValidationException;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.Scenarios.ScenarioFieldValueInfo;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.MockSensorPrototype;
 import cy.cs.ucy.ade.aioann01.WorkloadGenerator.Model.SensorPrototype.DatasetSensorPrototype;
@@ -130,9 +131,12 @@ public class SensorUtils<T> {
             }
             generationRate.processAndValidate(typesEnum);
             return generationRate;
-        } catch (Exception exception) {
+        } catch (ValidationException validationException) {
+            log.error(VALIDATION_EXCEPTION_CAUGHT + validationException.getMessage(), validationException);
+            throw new ValidationException("Could not process Generation Rate:"+validationException.getMessage());
+        }  catch (Exception exception) {
             log.error(EXCEPTION_CAUGHT + exception.getMessage(), exception);
-            throw exception;
+            throw new Exception("Could not process Generation Rate:" + exception.getMessage());
         }
     }
 

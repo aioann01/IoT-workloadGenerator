@@ -1,0 +1,71 @@
+	{
+					"datasetSensorPrototype": {
+						"exportGenerationRate": "true",
+
+						"sensorPrototypeName": "taxi",
+						"messageExportType": "json",
+						"timestampFormat": "yyyy-MM-dd HH:mm:ss",
+						"timestampedDataset": "true",
+						"sortedDataset": "false",
+						"datasetFile": "taxi.csv",
+						"timestampColumnName": "tpep_pickup_datetime",
+						"generationRate": {
+							"constant": {
+								"value": 2
+							}
+						},
+						"sensorIdColumnName": "VendorID",
+						"messagePrototype": {
+							"type": "json",
+							"fieldsPrototypes": [{
+								"name": "BusDriverAge",
+								"type": "integer",
+								"value": {
+									"random": {
+										"minValue": 30.0,
+										"maxValue": 50.0
+									}
+
+								},
+								"unit": "years old"
+							}]
+
+						}
+					}
+				},
+
+				{
+					"datasetSensorPrototype": {
+						"exportGenerationRate": "true",
+
+						"sensorPrototypeName": "dataTraffic",
+						"messageExportType": "xml",
+						"timestampFormat": "yyyy-MM-dd'T'HH:mm:ss",
+						"timestampedDataset": "true",
+						"sortedDataset": "true",
+						"datasetFile": "trafficData158324.csv",
+						"timestampColumnName": "TIMESTAMP",
+						"sensorIdColumnName": "_id"
+					}
+
+				},
+
+				{
+					"datasetSensorPrototype": {
+						"exportGenerationRate": "true",
+
+						"sensorPrototypeName": "panel",
+						"messageExportType": "json",
+						"timestampedDataset": "false",
+						"datasetFile": "pvwatts_hourly_cy.csv",
+						"generationRate": {
+							"constant": {
+								"value": 2
+							}
+						},
+						"messagePrototype": {
+							"type": "json"
+
+						}
+					}
+				},

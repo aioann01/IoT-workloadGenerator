@@ -73,13 +73,13 @@ public class RandomGenerationRate<T> extends GenerationRate{
             Number updatedMinValue = validateNumberValueType(type, minValue);
             Number updatedMaxValue = validateNumberValueType(type, maxValue);
             if(updatedMinValue == null || updatedMaxValue == null)
-                throw new ValidationException("toDo");
+                throw new ValidationException("Could not process RandomGenerationRate. Min and Max values must be Numbers");
             else{
                 maxValue = updatedMaxValue;
                 minValue = updatedMinValue;
             }
         }
         else
-            throw new ValidationException("toDo");
+            throw new ValidationException("Random Generation Rate supports only Numbers");
     }
 }

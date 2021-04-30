@@ -1,4 +1,5 @@
 FROM openjdk:8-jdk-alpine
+#FROM openjdk:8
 COPY ./WorkloadGenerator_ms/target/WorkloadGenerator-1.0.0-SNAPSHOT.jar home/WorkloadGenerator-1.0.0-SNAPSHOT.jar
 #COPY ./WorkloadGenerator_ms/configs_file.json home/configs/configs_file.json
 #CMD ["java","-jar","-Xdebug","-Xrunjdwp:transport=dt_socket,address=8092,server=y,suspend=n","/home/WorkloadGenerator-1.0.0-SNAPSHOT.jar"]

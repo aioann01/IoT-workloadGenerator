@@ -1,23 +1,25 @@
 {
 	"configs": {
-		"protocol": "KAFKA",
-"protocolConfigs": {
-			"topic": "home",
-			"kafkaBrokerClusters": [{
-				"serverIp": "kafka",
-				"serverPort": "9092"
+		"protocol": "HTTP",
+		"protocolConfigs": {
+			"requestURI": "/testing",
+
+			"httpServers": [{
+				"serverIp": "localhost",
+				"serverPort": "8095"
 			}]
 		},
-
-
 		"sensorDataConfigs": {
-			"sensorPrototypes": [{
-								
+			"sensorPrototypes": [
+
+
+
+				{
+
 					"mockSensorPrototype": {
-						"sensorPrototypeName": "motionDetection_sensor",
-												"evaluateFieldGenerationRate": true,
-						"outputFile": "motion_detection_output.csv",
-						"description": "Sensor that detects  movement and return true if motion or false if no motion",
+						"sensorPrototypeName": "temperature_sensor_with_scenarios",
+						"evaluateFieldGenerationRate": true,
+						"outputFile": "temperature_output.csv",
 						"sensorsQuantity": 2,
 						"generationRate": {
 							"constant": {
@@ -25,26 +27,160 @@
 							}
 						},
 						"messagePrototype": {
-							"type": "txt",
+							"type": "xml",
 							"fieldsPrototypes": [{
-								"name": "movement",
-								"type": "boolean",
+								"name": "temperature",
+								"type": "double",
+
 								"value": {
-									"distributions": [{
-											"value": true,
-											"probability": 0.5
-										},
-										{
-											"value": false,
-											"probability": 0.5
-										}
-									]
+									"normalDistribution": {
+										"mean": 20.0,
+										"deviation": 5.0
+									}
 								}
 							}]
-						}
+						},
+						"scenarios": [{
+							"sensorId": "1",
+							"scenarioName": "fire at room 1",
+							"scenarioDelay": "5",
+							"scenarioDuration": "5",
+							"scenarioFieldValueInfoList": [{
+								"sensorFieldScenarioName": "temperature",
+								"sensorFieldScenarioGenerationRate": {
+									"value": {
+										"normalDistribution": {
+											"mean": 40.0,
+											"deviation": 3.0
+										}
+									}
+								}
+							}]
+						}]
+					}
+				},
+
+
+				{
+					"mockSensorPrototype": {
+						"sensorPrototypeName": "ultra_sensor",
+						"evaluateFieldGenerationRate": true,
+						"outputFile": "ultra_output.csv",
+						"sensorsQuantity": 2,
+						"generationRate": {
+							"constant": {
+								"value": 2
+							}
+						},
+						"messagePrototype": {
+							"type": "json",
+							"fieldsPrototypes": [{
+									"name": "complexSensor",
+									"type": "object",
+									"value": [{
+											"name": "temperature in Celcius",
+											"type": "double",
+											"unit": "°C",
+											"value": {
+												"distributions": [{
+														"minValue": 20.0,
+														"maxValue": 25.0,
+														"probability": 0.05
+													},
+													{
+														"minValue": 25.0,
+														"maxValue": 30.0,
+														"probability": 0.25
+													},
+													{
+														"minValue": 30.0,
+														"maxValue": 35.0,
+														"probability": 0.7
+													}
+												]
+											}
+										},
+										{
+											"name": "brightness",
+											"type": "integer",
+											"value": {
+												"random": {
+													"minValue": 0,
+													"maxValue": 5
+												}
+											}
+										},
+										{
+											"name": "humidity",
+											"type": "integer",
+											"unit": " %",
+											"value": {
+												"random": {
+													"minValue": 0,
+													"maxValue": 100
+												}
+											}
+										},
+										{
+											"name": "motion",
+											"type": "integer",
+											"value": {
+												"distributions": [{
+														"value": 0.0,
+														"probability": 0.75
+													},
+													{
+														"value": 1.0,
+														"probability": 0.25
+													}
+												]
+											}
+										},
+										{
+											"name": "motionDetection",
+											"type": "boolean",
+											"value": {
+												"distributions": [{
+														"value": false,
+														"probability": 0.75
+													},
+													{
+														"value": true,
+														"probability": 0.25
+													}
+												]
+											}
+										}
+									]
+								},
+								{
+									"name": "dummyConstant",
+									"type": "integer",
+									"value": {
+										"constant": {
+											"value": 2
+										}
+									}
+								},
+								{
+									"name": "dummyNormalDistribution",
+									"type": "double",
+									"value": {
+										"normalDistribution": {
+											"mean": 20.0,
+											"deviation": 5.0
+										}
+									},
+									"unit": "%"
+								}
+
+
+
+
+							]
 						}
 					}
-				
+				}
 			]
 		}
 	}

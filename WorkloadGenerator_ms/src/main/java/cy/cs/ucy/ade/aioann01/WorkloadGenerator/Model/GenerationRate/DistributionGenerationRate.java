@@ -28,6 +28,10 @@ public class DistributionGenerationRate extends GenerationRate{
         return distributions;
     }
 
+    public void setDistributions(List<Distribution> distributions) {
+        this.distributions = distributions;
+    }
+
     @Override
     public Object generateValue(TypesEnum type) {
         Random rand = new Random();
@@ -65,20 +69,20 @@ public class DistributionGenerationRate extends GenerationRate{
         for(Distribution distribution: distributions) {
             if(distribution.getValue() != null){
                 if(distribution.getValue() == null || !isValueOfType(type, distribution.getValue()))
-                    throw new ValidationException("toDo");
+                    throw new ValidationException("Value of distribution of DistributionGenerationRate is not the same as the type");
             }
             else{
                 Number updatedMinValue = validateNumberValueType(type, distribution.getMinValue());
                 Number updatedMaxValue = validateNumberValueType(type, distribution.getMaxValue());
                 if(updatedMaxValue == null || updatedMinValue == null || distribution.getProbability() == null || !(distribution.getProbability() instanceof Double))
-                    throw new ValidationException("toDo");
+                    throw new ValidationException("Could not process DistributionGenerationRate. Distributions Min and Max values must be Numbers");
                 else{
                     distribution.setMinValue(updatedMinValue);
                     distribution.setMaxValue(updatedMaxValue);
                 }
             }
             probabilitySum += distribution.getProbability();}
-        if(probabilitySum < 1.0)
-            throw new ValidationException("toDo");
+        if(probabilitySum < 1.0 || probabilitySum > 1.0)
+            throw new ValidationException("Sum of Probabilities must be equal to 1 for distribution DistributionGenerationRate");
     }
 }
