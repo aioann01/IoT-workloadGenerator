@@ -1,14 +1,18 @@
 pipeline {
     agent any
-
     stages {
+	stage('Checkout'){
+	    steps{
+		echo 'Checkout..'
+	    	git 'https://github.com/aioann01/IoT-workloadGenerator.git'
+		cd WorkloadGenerator_ms
+	    }
+	}
         stage('Build') {
             steps {
                 echo 'Building..'
-				dir('WorkloadGenerator_ms'){
-					sh "pwd"}				
-				sh('./build.sh')
-            }
+		mvn clean install
+	    }		
         }
         stage('Test') {
             steps {
