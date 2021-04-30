@@ -1,17 +1,15 @@
-pipeline {
    node('master') {
-    stages {
 	stage('Checkout'){
 	    steps{
 		echo 'Checkout..'
 	    	git 'https://github.com/aioann01/IoT-workloadGenerator.git'
-		cd WorkloadGenerator_ms
+		bat 'cd WorkloadGenerator_ms'
 	    }
 	}
         stage('Build') {
             steps {
                 echo 'Building..'
-		mvn clean install
+		bat 'mvn clean install'
 	    }		
         }
         stage('Test') {
@@ -24,6 +22,4 @@ pipeline {
                 echo 'Deploying....'
             }
         }
-    }
    }
-}
