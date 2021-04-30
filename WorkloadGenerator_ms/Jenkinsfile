@@ -2,11 +2,11 @@
 	stage('Checkout'){
 		echo 'Checkout..'
 	    	git 'https://github.com/aioann01/IoT-workloadGenerator.git'
-		bat 'cd WorkloadGenerator_ms'
 	}
         stage('Build') {
                 echo 'Building..'
-		bat 'mvn clean install'		
+		sh 'cd WorkloadGenerator_ms/'
+		sh 'mvn clean install'		
         }
         stage('Test') {
             steps {
