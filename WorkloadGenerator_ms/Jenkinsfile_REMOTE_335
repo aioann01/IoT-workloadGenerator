@@ -1,18 +1,17 @@
-node('master') {
+   node('master') {
 	stage('Checkout'){
 		echo 'Checkout..'
 	    	git 'https://github.com/aioann01/IoT-workloadGenerator.git'
 	}
-    stage('Build') {
-        echo 'Building..'
+        stage('Build') {
+                echo 'Building..'
 		sh 'cd WorkloadGenerator_ms/'
 		sh 'mvn clean install'		
         }
-    stage('Test') {  
+        stage('Test') {  
 		echo 'Testing..'
-		sh 'mvn test'
 	}
-    stage('Deploy') {
-		echo 'Deploying....'
+        stage('Deploy') {
+                echo 'Deploying....'
         }
    }
