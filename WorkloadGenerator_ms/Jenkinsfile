@@ -1,28 +1,17 @@
-pipeline {
-    agent any
-
-    stages {
-	
-		stage('Checkout'){
-		    echo 'Checkout..'
-			git 'https://github.com/aioann01/IoT-workloadGenerator.git'
-			cd WorkloadGenerator_ms
-			}
+node('master') {
+	stage('Checkout'){
+		echo 'Checkout..'
+	    	git 'https://github.com/aioann01/IoT-workloadGenerator.git'
+	}
         stage('Build') {
-            steps {
                 echo 'Building..'
-				mvn clean install
-				
+		sh 'cd WorkloadGenerator_ms/'
+		sh 'mvn clean install'		
         }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
+        stage('Test') {  
+		echo 'Testing..'
+	}
         stage('Deploy') {
-            steps {
                 echo 'Deploying....'
-            }
         }
-    }
-}
+   }
